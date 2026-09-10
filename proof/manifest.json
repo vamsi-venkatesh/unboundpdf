@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "publishedAt": "2026-09-10",
+  "source": {
+    "repository": "local-seo-lab",
+    "commit": "5c1d6c66ec08f986fdc2b787f0b5d3c1738c9744",
+    "historyImported": false
+  },
+  "scope": {
+    "productionToolCount": 53,
+    "publishedToolCount": 3,
+    "tools": [
+      "merge-pdf",
+      "ocr-pdf",
+      "redaction-verifier"
+    ],
+    "workspace": "limited merge-and-receipt demonstration",
+    "ocrLanguagesBundled": [
+      "eng"
+    ]
+  },
+  "verification": {
+    "commands": [
+      "npm test",
+      "npm run audit:public"
+    ],
+    "filesBeforeManifest": 91
+  },
+  "artifacts": {
+    "tools/merge-pdf/index.html": {
+      "sha256": "f14bb59ee868012822574f4c42e7e9084e1a5f2e0cedbd4f7a447a99ff054018",
+      "bytes": 26485
+    },
+    "tools/assets/tools/t/merge-pdf.js": {
+      "sha256": "41fb7bc18aaad36de691b3e87db5a04e25956babfe4f8650029812d84355f44e",
+      "bytes": 5643
+    },
+    "tools/ocr-pdf/index.html": {
+      "sha256": "eadf0efaae55884e4487c5eb480c989b5dc4a79117c2f20e866e57dac1ac19d5",
+      "bytes": 26446
+    },
+    "tools/assets/tools/t/ocr-pdf.js": {
+      "sha256": "8a363df7a3b984980a3d083a3a88c8d5e11c3b1d7c43e763035e4618de5469c6",
+      "bytes": 44982
+    },
+    "tools/redaction-verifier/index.html": {
+      "sha256": "0b9dff46d3d66c325efd1818315b3be7d2055777f34adb67936d5e1b71f0b72a",
+      "bytes": 26496
+    },
+    "tools/assets/tools/t/redaction-verifier.js": {
+      "sha256": "91ea9ab0537e314df18075e277370bbaa3f2c9cd2bd71beac6f8b07275a35d13",
+      "bytes": 10053
+    },
+    "tools/assets/redaction-audit.js": {
+      "sha256": "84682181daf7c1c3e53a8d63949ff9b0a252046fa8de9f890af6c6703d182ac6",
+      "bytes": 34039
+    },
+    "workspace/index.html": {
+      "sha256": "224e0337d18d210318ae3cf8d580446f64b549275fe94df2c4672e4f1ed6bf10",
+      "bytes": 1807
+    },
+    "workspace/workspace-demo.js": {
+      "sha256": "882a82a1524cffb27cd8e2d5fa6d34ee4f598c4aa60e4ab63e219ad6cd13252d",
+      "bytes": 3113
+    }
+  },
+  "withheld": [
+    "remaining tool implementations",
+    "full PDF Editor",
+    "production Workspace",
+    "SEO and content engine",
+    "research and competitor captures",
+    "deployment and infrastructure",
+    "analytics and review data",
+    "credentials and canonical history"
+  ]
+}

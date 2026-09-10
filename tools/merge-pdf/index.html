@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Merge PDF — Free, Private, In Browser | UnboundPDF</title>
+<meta name="description" content="Merge PDF files free in your browser. Combine multiple PDFs into one — no upload, no sign-up, no watermark, no hourly cap.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://unboundpdf.com/tools/merge-pdf/">
+<!--unbound-head-->
+<meta property="og:site_name" content="UnboundPDF">
+<meta property="og:url" content="https://unboundpdf.com/tools/merge-pdf/">
+<meta property="og:image" content="https://unboundpdf.com/tools/assets/og-image.png?v=205">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Merge PDF — Free, Private, In Browser | UnboundPDF">
+<meta name="twitter:description" content="Merge PDF files free in your browser. Combine multiple PDFs into one — no upload, no sign-up, no watermark, no hourly cap.">
+<meta name="twitter:image" content="https://unboundpdf.com/tools/assets/og-image.png?v=205">
+<meta name="theme-color" content="#17171A">
+<link rel="icon" href="https://unboundpdf.com/favicon-black.svg" type="image/svg+xml">
+<link rel="alternate icon" href="https://unboundpdf.com/favicon.ico" sizes="any">
+<link rel="icon" href="/tools/assets/favicon.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" sizes="180x180" href="/tools/assets/apple-touch-icon.png?v=205">
+<link rel="manifest" href="/tools/assets/site.webmanifest?v=205">
+<!--/unbound-head-->
+<meta property="og:title" content="Merge PDF — Free &amp; Private">
+<meta property="og:description" content="Merge PDF files free in your browser. Combine multiple PDFs into one — no upload, no sign-up, no watermark, no hourly cap.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="/tools/assets/theme.css?v=205">
+<style>
+/* .ab-answer — the answer-first block guides/how-tos/compare already carry, restated here because
+   tool pages load theme.css only. Same visual shape as gen_guides.mjs's rule, in theme tokens. */
+.tool-main > .ab-answer { font-size: 16.5px; line-height: 1.6; font-weight: 500; color: var(--ink); background: var(--accent-l); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--radius-sm); padding: 14px 16px; margin: 0 0 20px; }
+/* the block is a SIBLING of the header (not a child) purely so the phone can reorder it —
+   on desktop the 10px header gap + this block's 20px bottom margin reproduce the exact
+   spacing it had while it lived inside .tool-head. */
+.tool-main.has-answer > .tool-head { margin-bottom: 10px; }
+/* NARROW SCREENS: the answer must not add height ABOVE the tool. On /tools/pdf-editor/ at
+   390x844 its 241px pushed .ed-viewport's top to y=393; with a 340px keyboard the free zone
+   (393..504) collapsed and the active line was left off-screen — 4 failures in
+   _qa/mobile-editor.mjs ("active line stays inside the visual viewport with the keyboard
+   up"). Below the tool surface it still answers the question and costs the tool nothing. */
+@media (max-width: 900px) {
+  .tool-main.has-answer { display: flex; flex-direction: column; }
+  .tool-main.has-answer > .tool-head { order: 1; }
+  .tool-main.has-answer > .tool-card-panel { order: 2; }
+  .tool-main.has-answer > .ab-answer { order: 3; margin: 24px 0 0; }
+}
+</style>
+<!-- defer: 256KB was render-blocking on every tool page. Only pdf-engine.js (also defer) touches
+     PDFLib, and defer preserves document order, so the library is still ready before the engine runs. -->
+<script src="/tools/assets/pdf-lib.min.js?v=205" onerror="window.__PDFLIB_FAILED=true" defer></script>
+<script src="/tools/assets/handoff.js?v=205" defer></script>
+<script src="/tools/assets/pdf-engine.js?v=205" defer></script>
+<!-- Shared execution runtime (truthful phases, cancellation, cleanup ledger). Loads AFTER
+     pdf-engine.js and BEFORE the tool logic, per P1-DESIGN 1.1: defer preserves document
+     order, so window.UnboundRun exists before any tool body runs. -->
+<script src="/tools/assets/runtime.js?v=205" defer></script>
+<script src="/tools/assets/tools/core.js?v=205" defer></script>
+<script src="/tools/assets/tools/t/merge-pdf.js?v=205" defer></script>
+<script src="/tools/assets/site.js?v=205" defer></script>
+<!--unbound-schema-->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Merge PDF — UnboundPDF","applicationCategory":"UtilitiesApplication","operatingSystem":"Any (web browser)","url":"https://unboundpdf.com/tools/merge-pdf/","description":"Merge PDF combines two or more PDFs into one file in your browser — free, no account, no watermark. Documents are not uploaded to a server. Drag to set the order, then download a single merged PDF. Merge PDF is one of UnboundPDF's 53 free browser-based PDF and image tools: it runs on your own device with no upload, no account and no watermark, and reports what it measured on the output.","browserRequirements":"Requires a modern web browser. No installation.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"provider":{"@type":"Organization","name":"UnboundPDF","url":"https://unboundpdf.com/"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://unboundpdf.com/"},{"@type":"ListItem","position":2,"name":"Merge PDF","item":"https://unboundpdf.com/tools/merge-pdf/"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"HowTo","name":"How to merge PDF","description":"Merge PDF combines two or more PDFs into one file in your browser — free, no account, no watermark. Documents are not uploaded to a server. Drag to set the order, then download a single merged PDF. Merge PDF is one of UnboundPDF's 53 free browser-based PDF and image tools: it runs on your own device with no upload, no account and no watermark, and reports what it measured on the output.","tool":[{"@type":"HowToTool","name":"Merge PDF — UnboundPDF, free, in your browser"}],"step":[{"@type":"HowToStep","position":1,"text":"Drop two or more PDFs onto the page or click to browse; they load right in your browser and are never uploaded."},{"@type":"HowToStep","position":2,"text":"Drag any file by its grip handle, or use the up and down arrows, to set the order the files will appear in."},{"@type":"HowToStep","position":3,"text":"Add more files or remove any you do not need, then click Merge PDFs."},{"@type":"HowToStep","position":4,"text":"Preview the combined result and download the single merged PDF."}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Are my files uploaded to a server?","acceptedAnswer":{"@type":"Answer","text":"No. UnboundPDF processes PDFs locally in the browser — documents are not uploaded to a server. We have no backend that receives, stores, or scans your files."}},{"@type":"Question","name":"Is there a limit on how many PDFs I can combine?","acceptedAnswer":{"@type":"Answer","text":"There is no fixed cap in the tool, and we will not quote one. What we can give you is what was measured on 2026-08-15 on one desktop machine (Apple M4, 16 GB, macOS): merging was observed completing a 500-page 99.6 MB document and a 300-page 119 MB scan into valid 501- and 301-page PDFs on Chrome's, Firefox's and Safari's engines alike, each output reopened and checked in an independent PDF reader. Those are the largest documents we watched it finish, not the point where it stops - no run in that matrix stopped. What a run needs still depends on the operation, the document's structure, the browser and the resources your device has free; UnboundPDF checks those before processing and tells you what it found. The tool just needs at least two valid PDFs to merge."}},{"@type":"Question","name":"Will the pages stay in the order I set?","acceptedAnswer":{"@type":"Answer","text":"Yes. Files are merged top to bottom in the order shown on screen, and every page from each file is kept."}},{"@type":"Question","name":"Can I merge a password-protected PDF?","acceptedAnswer":{"@type":"Answer","text":"Not directly. An encrypted file is flagged so you can unlock it first with the Unlock PDF tool, then add the unlocked copy to the merge."}},{"@type":"Question","name":"Does merging keep links and form fields?","acceptedAnswer":{"@type":"Answer","text":"Links and form fields on each page are carried into the combined document. Document-level bookmarks (the outline) are usually not preserved when files are joined."}},{"@type":"Question","name":"Will merging reduce the quality of my PDFs?","acceptedAnswer":{"@type":"Answer","text":"No. Pages are copied as they are, so text stays selectable and images keep their original quality — nothing is re-compressed."}},{"@type":"Question","name":"Can I merge PDFs of different page sizes?","acceptedAnswer":{"@type":"Answer","text":"Yes. Each file keeps its own page size in the merged document; they do not have to match."}}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://unboundpdf.com/tools/merge-pdf/","name":"Merge PDF — UnboundPDF","url":"https://unboundpdf.com/tools/merge-pdf/","speakable":{"@type":"SpeakableSpecification","cssSelector":[".uc-answer"]},"primaryImageOfPage":{"@type":"ImageObject","url":"https://unboundpdf.com/tools/assets/og-image.png","width":1200,"height":630}}</script>
+<!--/unbound-schema-->
+</head>
+<body data-tool="merge-pdf" data-cat="organize">
+<nav class="nav" aria-label="Main">
+  <div class="nav-in">
+    <a class="brand" href="/">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+      <span class="brand-t">UnboundPDF<small>Free · Private · In browser</small></span>
+    </a>
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+    <div class="nav-menu">
+      <div class="nav-dd">
+        <button type="button" aria-expanded="false">Tools <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+        <div class="nav-dd-panel"><a href="https://unboundpdf.com/tools/#cat-organize">Organize<span>Merge, split, and rearrange pages</span></a><a href="https://unboundpdf.com/tools/#cat-convert">Convert<span>Transform between PDF and other formats</span></a><a href="https://unboundpdf.com/tools/#cat-edit">Edit<span>Modify content, layout, and appearance</span></a><a href="https://unboundpdf.com/tools/#cat-optimize">Optimize<span>Compress, repair, and analyze PDFs</span></a><a href="https://unboundpdf.com/tools/#cat-security">Security<span>Protect, unlock, archive and check documents — including a report of what a PDF carries alongside the page, and the selective removal of it.</span></a><a href="https://unboundpdf.com/tools/#cat-images">Images<span>Passport and ID photos, background removal for portraits, HEIC conversion, image resizing and conversion, and PDF watermark removal — processed on your device, nothing uploaded.</span></a><a href="https://unboundpdf.com/tools/#cat-legal">Legal<span>Tools for production sets and filings: Bates numbers, exhibit labels, redaction logs and a verifier that checks any redacted PDF — all processed on your device, with real text stamps and hashes you can recompute.</span></a></div>
+      </div>
+      <a class="nav-link" href="https://unboundpdf.com/tools/">All Tools</a>
+      <a class="nav-link" href="/workspace/">Workspace</a>
+      <a class="nav-link" href="https://unboundpdf.com/privacy/">Privacy</a>
+    </div>
+  </div>
+</nav>
+<main>
+  <div class="wrap">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="/">Home</a><span class="sep">›</span>
+  <a href="https://unboundpdf.com/tools/#cat-organize">Organize</a><span class="sep">›</span>
+  <span class="current">Merge PDF</span>
+</nav>
+    <div class="tool-layout">
+      <div class="tool-main has-answer">
+        <header class="tool-head">
+          <div class="kicker">Free · Private · In your browser</div>
+          <h1><span class="hero-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4v4a4 4 0 0 0 4 4h9"/><path d="M5 20v-4a4 4 0 0 1 4-4h9"/><path d="M15 9l3 3-3 3"/></svg></span>Merge PDF</h1>
+          <p class="tool-intro">Add two or more PDFs, <b>drag to reorder</b>, then merge into one file.</p>
+        </header>
+        <p class="ab-answer">Merge PDF combines several PDFs into one file in the order you set, on your own device — drag the list to arrange it, and the output is the sum of the pages, nothing re-encoded. Images can join the merge after a pass through JPG to PDF. No upload, no account, no watermark.</p>
+        <div class="tool-card-panel" id="tool">
+          <div class="tool-card-body" id="toolBody">
+            <div id="toolUI"><div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload files"><div class="dz-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg></div><div class="dz-t">Drop your files here, or <b>click to browse</b></div><div class="dz-s">Processed on your device — nothing is uploaded</div><input type="file" id="fin" accept="application/pdf,.pdf"></div></div>
+            <p class="hint" style="text-align:center;margin-top:16px" id="engineNote"></p>
+          </div>
+        </div>
+      </div>
+      <!-- The pdf-editor-only <section class="ed-about"> lived here until 2026-08-04. It gave the
+           flagship tool a shape no other page had (+602px mobile) and duplicated its own page:
+           "How it works" restated the how-to steps, "Works with" overlapped the uses field. The
+           unique part (capability claims) is now DATA — tools.content.json capabilities, rendered by
+           gen_content.mjs for any tool that has one. Do not reintroduce a per-slug branch. -->
+    </div>
+  </div>
+  
+<!--unbound-content-->
+<section class="section unbound-content"><div class="wrap">
+  <p class="uc-answer">Merge PDF combines two or more PDFs into one file in your browser — free, no account, no watermark. Documents are not uploaded to a server. Drag to set the order, then download a single merged PDF. Merge PDF is one of UnboundPDF's 53 free browser-based PDF and image tools: it runs on your own device with no upload, no account and no watermark, and reports what it measured on the output.</p>
+  <details class="uc-fold">
+    <summary class="uc-fold-sum">How to merge PDF — steps &amp; common uses</summary>
+    <div class="uc-fold-body">
+  
+  
+  <div class="uc-uses">
+    <h2>What people use Merge PDF for</h2>
+    <p class="uc-uses-lead">Anyone assembling separate PDFs into one document — bundling paperwork, combining chapters, or joining scanned pages in a chosen order.</p>
+    <ul class="uc-uses-list"><li>Bundle invoices into one file</li><li>Combine contract pages and appendices</li><li>Join scanned documents in order</li><li>Assemble report chapters</li><li>Compile application paperwork</li></ul>
+  </div>
+  
+  
+  
+  <div class="uc-how">
+    <h2>How to merge PDF</h2>
+    <ol class="uc-steps"><li>Drop two or more PDFs onto the page or click to browse; they load right in your browser and are never uploaded.</li><li>Drag any file by its grip handle, or use the up and down arrows, to set the order the files will appear in.</li><li>Add more files or remove any you do not need, then click Merge PDFs.</li><li>Preview the combined result and download the single merged PDF.</li></ol>
+    
+  </div>
+    </div>
+  </details>
+  <details class="uc-fold">
+    <summary class="uc-fold-sum">Questions about Merge PDF <span class="uc-fold-n">7</span></summary>
+    <div class="uc-fold-body">
+  <div class="uc-faq">
+        <details class="uc-q"><summary>Are my files uploaded to a server?</summary><p>No. UnboundPDF processes PDFs locally in the browser — documents are not uploaded to a server. We have no backend that receives, stores, or scans your files.</p></details>
+        <details class="uc-q"><summary>Is there a limit on how many PDFs I can combine?</summary><p>There is no fixed cap in the tool, and we will not quote one. What we can give you is what was measured on 2026-08-15 on one desktop machine (Apple M4, 16 GB, macOS): merging was observed completing a 500-page 99.6 MB document and a 300-page 119 MB scan into valid 501- and 301-page PDFs on Chrome's, Firefox's and Safari's engines alike, each output reopened and checked in an independent PDF reader. Those are the largest documents we watched it finish, not the point where it stops - no run in that matrix stopped. What a run needs still depends on the operation, the document's structure, the browser and the resources your device has free; UnboundPDF checks those before processing and tells you what it found. The tool just needs at least two valid PDFs to merge.</p></details>
+        <details class="uc-q"><summary>Will the pages stay in the order I set?</summary><p>Yes. Files are merged top to bottom in the order shown on screen, and every page from each file is kept.</p></details>
+        <details class="uc-q"><summary>Can I merge a password-protected PDF?</summary><p>Not directly. An encrypted file is flagged so you can unlock it first with the Unlock PDF tool, then add the unlocked copy to the merge.</p></details>
+        <details class="uc-q"><summary>Does merging keep links and form fields?</summary><p>Links and form fields on each page are carried into the combined document. Document-level bookmarks (the outline) are usually not preserved when files are joined.</p></details>
+        <details class="uc-q"><summary>Will merging reduce the quality of my PDFs?</summary><p>No. Pages are copied as they are, so text stays selectable and images keep their original quality — nothing is re-compressed.</p></details>
+        <details class="uc-q"><summary>Can I merge PDFs of different page sizes?</summary><p>Yes. Each file keeps its own page size in the merged document; they do not have to match.</p></details>
+  </div>
+    </div>
+  </details>
+  <div class="uc-read"><h2>Read more</h2><div class="related"><a href="https://unboundpdf.com/how-to/merge-pdf-without-uploading/">How to merge PDF files without uploading them — the quick recipe</a><a href="https://unboundpdf.com/guides/">Guides</a><a href="https://unboundpdf.com/compare/">Compare with upload-based tools</a></div></div>
+</div></section>
+<!--/unbound-content-->
+  <section class="section section-alt" id="privacy">
+  <div class="wrap">
+    <div class="privacy-block">
+      <h2>How your files are handled</h2>
+      <p class="priv-lead">The work runs on your own device, inside the browser tab — so there is no server to send your document to.</p>
+      <ul class="privacy-list">
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>Nothing is uploaded.</b> We have no backend that receives or stores documents, so we cannot see your files during processing or after.</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>Your device does the work.</b> Large documents are handled in stages, pages are rendered as you reach them, and each job is checked against your device before it starts — so a long run takes longer on a phone than on a laptop, nothing is queued behind other people's jobs, and you can stop a run at any point without touching your original file.</span></li>
+        <li><span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></span><span><b>No account and no watermark.</b> The output is a clean file you can use anywhere, with no sign-up and no hourly cap.</span></li>
+      </ul>
+      
+    </div>
+  </div>
+</section>
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>More organize tools</h2>
+        <p>Other free PDF utilities that work the same way — in your browser, no sign-up.</p>
+      </div>
+      <div class="related" id="relatedTools"><a href="https://unboundpdf.com/tools/split-pdf/">Split PDF</a><a href="https://unboundpdf.com/tools/organize-pdf/">Organize PDF</a><a href="https://unboundpdf.com/tools/compress-pdf/">Compress PDF</a></div>
+    </div>
+  </section>
+</main>
+<footer>
+  <div class="foot-in">
+    <div class="foot-top">
+      <div>
+        <div class="foot-brand"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span><b>UnboundPDF</b></div>
+        <p class="foot-txt">Free PDF tools that run in your browser. Your files never leave your device. Not affiliated with Adobe.</p>
+      </div>
+      <div class="foot-cats"><div class="foot-cat"><h3>Organize</h3><a href="/tools/merge-pdf/">Merge PDF</a><a href="https://unboundpdf.com/tools/split-pdf/">Split PDF</a><a href="https://unboundpdf.com/tools/split-by-size/">Split by Size</a><a href="https://unboundpdf.com/tools/split-by-bookmarks/">Split by Bookmarks</a><a href="https://unboundpdf.com/tools/organize-pdf/">Organize PDF</a><a href="https://unboundpdf.com/tools/rotate-pdf/">Rotate PDF</a><a href="https://unboundpdf.com/tools/add-page-numbers/">Add Page Numbers</a><a href="https://unboundpdf.com/tools/booklet-imposition/">Booklet Maker</a><a href="https://unboundpdf.com/tools/split-book-scan/">Split Book Scan</a></div><div class="foot-cat"><h3>Convert</h3><a href="https://unboundpdf.com/tools/jpg-to-pdf/">JPG to PDF</a><a href="https://unboundpdf.com/tools/pdf-to-jpg/">PDF to JPG</a><a href="https://unboundpdf.com/tools/pdf-to-word/">PDF to Word</a><a href="https://unboundpdf.com/tools/word-to-pdf/">Word to PDF</a><a href="https://unboundpdf.com/tools/pptx-to-pdf/">PPTX to PDF</a><a href="https://unboundpdf.com/tools/html-to-pdf/">HTML to PDF</a><a href="https://unboundpdf.com/tools/pdf-to-excel/">PDF to Excel</a><a href="https://unboundpdf.com/tools/excel-to-pdf/">Excel to PDF</a><a href="https://unboundpdf.com/tools/markdown-to-pdf/">Markdown to PDF</a><a href="https://unboundpdf.com/tools/email-to-pdf/">Email to PDF</a></div><div class="foot-cat"><h3>Edit</h3><a href="https://unboundpdf.com/tools/pdf-editor/">PDF Editor</a><a href="https://unboundpdf.com/tools/watermark-pdf/">Watermark PDF</a><a href="https://unboundpdf.com/tools/crop-pdf/">Crop PDF</a><a href="https://unboundpdf.com/tools/resize-pdf/">Resize PDF</a><a href="https://unboundpdf.com/tools/deskew-pdf/">Deskew PDF</a><a href="https://unboundpdf.com/tools/redact-pdf/">Redact PDF</a><a href="https://unboundpdf.com/tools/edit-metadata/">Edit Metadata</a><a href="https://unboundpdf.com/tools/fill-sign/">Fill & Sign</a><a href="https://unboundpdf.com/tools/sign-pdf/">Sign PDF</a><a href="https://unboundpdf.com/tools/remove-annotations/">Remove Annotations</a><a href="https://unboundpdf.com/tools/overlay-pdf/">Overlay PDF</a><a href="https://unboundpdf.com/tools/make-fillable/">Make Fillable</a></div><div class="foot-cat"><h3>Optimize</h3><a href="https://unboundpdf.com/tools/compress-pdf/">Compress PDF</a><a href="https://unboundpdf.com/tools/repair-pdf/">Repair PDF</a><a href="https://unboundpdf.com/tools/flatten-pdf/">Flatten PDF</a><a href="https://unboundpdf.com/tools/extract-images/">Extract Images</a><a href="/tools/ocr-pdf/">OCR PDF</a><a href="https://unboundpdf.com/tools/compare-pdf/">Compare PDF</a><a href="https://unboundpdf.com/tools/remove-blank-pages/">Remove Blank Pages</a></div><div class="foot-cat"><h3>Security</h3><a href="https://unboundpdf.com/tools/protect-pdf/">Protect PDF</a><a href="https://unboundpdf.com/tools/unlock-pdf/">Unlock PDF</a><a href="https://unboundpdf.com/tools/pdf-a/">PDF/A</a><a href="https://unboundpdf.com/tools/sanitize-pdf/">Sanitize PDF</a></div><div class="foot-cat"><h3>Images</h3><a href="https://unboundpdf.com/tools/heic-convert/">HEIC Converter</a><a href="https://unboundpdf.com/tools/passport-photo/">Passport Photo</a><a href="https://unboundpdf.com/tools/remove-background/">Remove Background</a><a href="https://unboundpdf.com/tools/remove-watermark-pdf/">Remove Watermark</a><a href="https://unboundpdf.com/tools/resize-image/">Resize Image</a></div><div class="foot-cat"><h3>Legal</h3><a href="https://unboundpdf.com/tools/bates-numbering/">Bates Numbering</a><a href="https://unboundpdf.com/tools/exhibit-stamper/">Exhibit Stamper</a><a href="https://unboundpdf.com/tools/redaction-log/">Redaction Log</a><a href="/tools/redaction-verifier/">Redaction Verifier</a><a href="https://unboundpdf.com/tools/extract-text/">Extract Text</a><a href="https://unboundpdf.com/tools/headers-footers/">Headers & Footers</a></div></div>
+    </div>
+    <div class="foot-bottom">
+      <nav class="foot-legal" aria-label="Footer"><a href="https://unboundpdf.com/guides/">Guides</a><a href="https://unboundpdf.com/how-to/">How-to</a><a href="https://unboundpdf.com/blog/">Blog</a><a href="https://unboundpdf.com/compare/">Compare</a><a href="/workspace/">Workspace</a><a href="https://unboundpdf.com/privacy/">Privacy</a><a href="https://unboundpdf.com/terms/">Terms</a><a href="https://unboundpdf.com/licenses/">Licences</a><a href="https://unboundpdf.com/about/">About</a><a href="https://unboundpdf.com/trust/">Trust</a><a href="https://unboundpdf.com/contact/">Contact</a></nav>
+      <p class="foot-meta">© 2026 UnboundPDF</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

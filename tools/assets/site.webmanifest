@@ -1,0 +1,17 @@
+{
+  "name": "UnboundPDF — Every PDF tool you need",
+  "short_name": "UnboundPDF",
+  "description": "Free, private, in-browser PDF tools. Merge, split, compress, convert, edit, sign, OCR and more — no uploads, no accounts, no limits, no watermarks.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#FAFAF8",
+  "theme_color": "#17171A",
+  "icons": [
+    { "src": "/favicon-black.svg", "type": "image/svg+xml", "sizes": "any", "purpose": "any" },
+    { "src": "/tools/assets/icon-192.png?v=205", "type": "image/png", "sizes": "192x192", "purpose": "any" },
+    { "src": "/tools/assets/icon-512.png?v=205", "type": "image/png", "sizes": "512x512", "purpose": "any" },
+    { "src": "/tools/assets/maskable-icon-192.png?v=205", "type": "image/png", "sizes": "192x192", "purpose": "maskable" },
+    { "src": "/tools/assets/maskable-icon-512.png?v=205", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

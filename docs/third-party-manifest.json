@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "scope": "Only dependencies shipped in this selected public edition",
+  "entries": [
+    {
+      "id": "pdfjs",
+      "name": "pdf.js",
+      "version": "3.11.174",
+      "license": "Apache-2.0",
+      "copyright": "Copyright 2023 Mozilla Foundation",
+      "homepage": "https://mozilla.github.io/pdf.js/",
+      "files": [
+        "tools/assets/pdf.min.js",
+        "tools/assets/pdf.worker.min.js"
+      ]
+    },
+    {
+      "id": "pdf-lib",
+      "name": "pdf-lib",
+      "version": "unspecified in bundle (no semver string embedded; vendored per pdf-textedit.js/pdf-textops.js dependency comment)",
+      "license": "MIT",
+      "copyright": "Copyright (c) Andrew Dillon and pdf-lib contributors",
+      "homepage": "https://pdf-lib.js.org/",
+      "files": [
+        "tools/assets/pdf-lib.min.js"
+      ]
+    },
+    {
+      "id": "tesseractjs",
+      "name": "Tesseract.js (worker, wasm core, engine)",
+      "version": "5.1.1",
+      "license": "Apache-2.0",
+      "copyright": "Copyright (c) Tesseract.js contributors; includes the Tesseract OCR engine, (c) Google Inc. and Tesseract OCR contributors",
+      "homepage": "https://github.com/naptha/tesseract.js",
+      "files": [
+        "tools/assets/tesseract.min.js",
+        "tools/assets/tesseract/worker.min.js",
+        "tools/assets/tesseract/tesseract-core-lstm.wasm",
+        "tools/assets/tesseract/tesseract-core-lstm.wasm.js",
+        "tools/assets/tesseract/tesseract-core-simd-lstm.wasm",
+        "tools/assets/tesseract/tesseract-core-simd-lstm.wasm.js"
+      ],
+      "staticallyLinked": [
+        {
+          "name": "Leptonica",
+          "upstream": "https://github.com/DanBloomberg/leptonica",
+          "license": "BSD-2-Clause",
+          "copyright": "Copyright (C) 2001-2020 Leptonica. All rights reserved."
+        },
+        {
+          "name": "libjpeg (IJG)",
+          "upstream": "https://github.com/LuaDist/libjpeg (mirror of the Independent JPEG Group's libjpeg)",
+          "license": "IJG",
+          "copyright": "Copyright (C) 1991-1998, Thomas G. Lane. All Rights Reserved except as specified in the licence."
+        },
+        {
+          "name": "giflib",
+          "upstream": "https://github.com/mirrorer/giflib (a.k.a. sourceforge.net/projects/giflib)",
+          "license": "MIT",
+          "copyright": "See giflib's own COPYING file (no single named copyright holder line; MIT-licensed since giflib 5.x)."
+        },
+        {
+          "name": "libpng",
+          "upstream": "https://github.com/glennrp/libpng",
+          "license": "Libpng",
+          "copyright": "Copyright (c) 1995-2026 The PNG Reference Library Authors. Copyright (c) 2018-2026 Cosmin Truta. Copyright (c) 2000-2002,2004,2006-2018 Glenn Randers-Pehrson. Copyright (c) 1996-1997 Andreas Dilger. Copyright (c) 1995-1996 Guy Eric Schalnat, Group 42, Inc."
+        },
+        {
+          "name": "libtiff",
+          "upstream": "https://gitlab.com/libtiff/libtiff",
+          "license": "libtiff (MIT-style; SPDX 'libtiff')",
+          "copyright": "Copyright (c) 1988-1997 Sam Leffler. Copyright (c) 1991-1997 Silicon Graphics, Inc."
+        },
+        {
+          "name": "libwebp",
+          "upstream": "https://github.com/webmproject/libwebp",
+          "license": "BSD-3-Clause",
+          "copyright": "Copyright (c) 2010, Google Inc. All rights reserved."
+        },
+        {
+          "name": "zlib",
+          "upstream": "https://github.com/madler/zlib",
+          "license": "Zlib",
+          "copyright": "(C) 1995-2026 Jean-loup Gailly and Mark Adler"
+        },
+        {
+          "name": "openlibm",
+          "upstream": "https://github.com/JuliaMath/openlibm",
+          "license": "MIT AND ISC AND BSD-2-Clause (composite; see licence text for the per-portion breakdown)",
+          "copyright": "Copyright (c) 2011-14 The Julia Project (MIT portions). Copyright (c) 2008 Stephen L. Moshier (ISC portions). Copyright 1992-2011 The FreeBSD Project (BSD msun portions). Copyright (C) 1993 Sun Microsystems, Inc. (FDLIBM portions)."
+        }
+      ]
+    },
+    {
+      "id": "tesseract-langdata-legacy",
+      "name": "Tesseract OCR trained language data \u2014 legacy set (7 files: eng/deu/fra/spa/ita/por/nld)",
+      "version": "tessdata (the MAIN tesseract-ocr/tessdata repo, combined legacy+LSTM family \u2014 NOT tessdata_best), mirrored via tessdata.projectnaptha.com/4.0.0 per fetch-tesseract.sh",
+      "license": "Apache-2.0",
+      "copyright": "Copyright (c) Google Inc. and Tesseract OCR contributors",
+      "homepage": "https://github.com/tesseract-ocr/tessdata",
+      "files": [
+        "tools/assets/tesseract/lang/eng.traineddata.gz"
+      ]
+    },
+    {
+      "id": "regenerator-runtime",
+      "name": "regenerator-runtime (bundled inside tesseract.js worker.min.js)",
+      "version": "unspecified in notice",
+      "license": "MIT",
+      "copyright": "Copyright (c) 2014-present, Facebook, Inc.",
+      "homepage": "https://github.com/facebook/regenerator",
+      "files": [
+        "tools/assets/tesseract/worker.min.js"
+      ]
+    },
+    {
+      "id": "plus-jakarta-sans",
+      "name": "Plus Jakarta Sans",
+      "version": "2.071",
+      "license": "OFL-1.1",
+      "copyright": "Copyright 2020 The Plus Jakarta Sans Project Authors (https://github.com/tokotype/PlusJakartaSans)",
+      "homepage": "https://github.com/tokotype/PlusJakartaSans",
+      "files": [
+        "tools/assets/fonts/PlusJakartaSans-latin.woff2",
+        "tools/assets/fonts/PlusJakartaSans-latin-ext.woff2"
+      ]
+    }
+  ]
+}

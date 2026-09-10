@@ -1,0 +1,2511 @@
+/* PDF Toolkit — light premium design system */
+
+/* Self-hosted Plus Jakarta Sans (variable, 400-800).
+   Was a fonts.googleapis.com @import — silently killed by our own CSP (style-src 'self'),
+   so every visitor rendered in system fonts. Self-hosting also means no third party
+   learns who reads this page, which is the point of the product. */
+/* CLS fix (measured 2026-07-29): the brand font swapped in at ~680ms and re-flowed every
+   sans block below the hub hero — home CLS 0.15 mobile / 0.11 desktop, the only Core Web
+   Vital outside "good" (tool pages: 0.007). This fallback face is Arial WEARING JAKARTA'S
+   METRICS, measured empirically in canvas (Jakarta is 3.13% wider than Arial; ascent 104,
+   descent 22 per 100px em): pre-swap text occupies the same lines and heights as post-swap,
+   so the swap stops moving layout. Numbers are measurements, not tuning — re-derive them if
+   the font file ever changes. */
+/* Two faces because the ratios are weight-dependent (measured): regular Jakarta is 4.2%
+   WIDER than regular Arial, but bold Jakarta is ~0.5% NARROWER than bold Arial — one blanket
+   size-adjust fixed body text while still re-wrapping every bold chip. */
+@font-face {
+  font-family: "PJS Fallback";
+  src: local("Arial");
+  font-weight: 400 500;
+  size-adjust: 104.2%; ascent-override: 99.81%; descent-override: 21.11%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: "PJS Fallback";
+  src: local("Arial");
+  font-weight: 600 800;
+  size-adjust: 100.5%; ascent-override: 103.5%; descent-override: 21.9%; line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url("/tools/assets/fonts/PlusJakartaSans-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: 400 800; font-display: swap;
+  src: url("/tools/assets/fonts/PlusJakartaSans-latin-ext.woff2") format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* ── INK & PAPER ──────────────────────────────────────────────────────────────
+   Brand = ink; typography carries the identity, not a hue. Warm paper neutrals,
+   not cold SaaS grey. ONE functional colour — green — and it has exactly one job:
+   "this runs on your device". Never decorate with it; if it's green, it's a claim.
+   Red is abandoned deliberately: Adobe, iLovePDF and Smallpdf are all red, so red
+   means looking like them. --accent stays the primary-action token (now ink) so
+   every existing component inherits the new system without being rewritten.
+   ────────────────────────────────────────────────────────────────────────────── */
+:root {
+  --white: #FFFFFF;
+  --ground: #FAFAF8;        /* paper */
+  --ground-alt: #F4F3EF;
+  --ground-alt2: #F7F6F2;
+  --card: #FFFFFF;
+  --ink: #17171A;
+  --ink2: #55555F;
+  --ink3: #6B6B75;          /* WCAG AA: #8B8B95 was 3.2:1 on paper — every card description failed */
+  --accent: #17171A;        /* primary action = ink */
+  --accent-d: #000000;
+  --accent-l: #F1F0EC;
+  --accent-glow: rgba(23, 23, 26, 0.10);
+  --accent-rgb: 23, 23, 26;   /* for rgba() tints — keep in sync with --accent */
+  --local: #0E7C57;         /* the only colour with a job: local processing */
+  --local-bg: #EDF7F2;
+  --local-ln: #BFE3D3;
+  --line: #E5E4DE;
+  --line2: #D2D1C9;
+  --ok: #0E7C57;
+  --ok-bg: #EDF7F2;
+  --err: #B4231D;
+  --err-bg: #FBEFEE;
+  --warn: #965D04;         /* WCAG AA: #A96A05 failed on every surface it was used on —
+                              4.07:1 on --warn-bg, 4.42 on card, 4.23 on paper. It reads as
+                              the same amber; it just clears 4.5:1 now (5.01 / 5.43 / 5.20). */
+  --warn-bg: #FBF5EA;
+  --sans: "Plus Jakarta Sans", "PJS Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  /* Display voice — a PDF product should speak in set type. System serifs only (CSP: no
+     third-party fonts, and vendoring a display serif is weight we don't need): Iowan/Palatino
+     on Apple, Georgia elsewhere. Page headings are serif; UI stays sans. */
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+
+  /* ── Motion (elevation pass) ──
+     One easing curve, three durations. --ease is a decisive Linear-style curve (fast out,
+     settled landing). Kept as --ease so every existing transition inherits the new feel. */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 280ms;
+
+  /* ── Elevation ── crisp, small, ink-alpha (never blurry drop-shadow soup). */
+  --shadow-xs: 0 1px 1px rgba(23, 23, 26, 0.04);
+  --shadow-sm: 0 1px 2px rgba(23, 23, 26, 0.05), 0 1px 1px rgba(23, 23, 26, 0.03);
+  --shadow: 0 1px 2px rgba(23, 23, 26, 0.05), 0 6px 16px rgba(23, 23, 26, 0.06);
+  --shadow-lg: 0 2px 6px rgba(23, 23, 26, 0.06), 0 16px 36px rgba(23, 23, 26, 0.09);
+
+  /* ── Radii ── 6 / 10 / 14 */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --radius-lg: 14px;
+
+  /* ── Spot inks (design elevation 2026-08-03) ──
+     Five printer's spot colours, one per tool category — the energy the monochrome grids
+     lacked, WITHOUT leaving Ink & Paper: these are muted press inks, not SaaS brights.
+     Green keeps its single job ("runs on your device") — no category uses it. All five
+     carry a white glyph at ≥4:1 (icon = non-text, 3:1 required; we clear 4). */
+  --spot-organize: #3D5A80;   /* indigo ink   */
+  --spot-convert:  #8A6117;   /* print ochre  */
+  --spot-edit:     #5D4A82;   /* violet ink   */
+  --spot-optimize: #96502A;   /* sienna       */
+  --spot-security: #31606E;   /* cyan slate   */
+  /* W5-E1 (2026-08-21): a sixth category (Images) needs a sixth ink. Madder lake — a muted
+     press red, the one warm hue not already spoken for (sienna is orange-brown, violet is
+     cool). Green still keeps its single job ("runs on your device"), so it is not used here. */
+  --spot-images:   #8A4757;   /* madder lake  */
+  --spot-legal:    #6B4E2E;   /* oak gall     */
+
+  /* ── Spacing scale ── 4 / 8 / 12 / 16 / 24 / 32 / 48 */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+
+  --touch: 44px;
+  --max: 1120px;
+  --nav-h: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 16px); }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+::selection { background: var(--accent-l); color: var(--accent-d); }
+a { color: var(--accent); text-decoration: none; transition: color 0.15s; }
+a:hover { color: var(--accent-d); }
+/* Ink brand means links no longer stand out by hue, so prose links carry an underline.
+   Scoped to running text — nav, cards and buttons style themselves and must stay clean. */
+p a, .uc-how a, .uc-q a, dd a { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--line2); }
+p a:hover, .uc-how a:hover, .uc-q a:hover, dd a:hover { text-decoration-color: currentColor; }
+button, input, select, textarea { font-family: inherit; }
+img, svg { display: block; max-width: 100%; }
+main { flex: 1; }
+
+/* Layout */
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 24px; }
+.section { padding: 64px 0; }
+.section-alt { background: var(--ground-alt); }
+.section-head { margin-bottom: 32px; }
+.section-head h2 {
+  font-family: var(--serif);
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.section-head p {
+  font-size: 16px;
+  color: var(--ink2);
+  margin-top: 8px;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* Nav */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--nav-h);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px) saturate(1.1);
+  border-bottom: 1px solid var(--line);
+}
+.nav-in {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  flex-shrink: 0;
+}
+.brand:hover { text-decoration: none; color: inherit; }
+.brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--accent);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.brand-mark svg { width: 20px; height: 20px; }
+.brand-t {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+.brand-t small {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--ink3);
+  margin-top: 1px;
+}
+
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.nav-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-link:hover { background: var(--ground-alt); color: var(--ink); text-decoration: none; }
+.nav-link.active { color: var(--accent); background: var(--accent-l); }
+
+.nav-dd { position: relative; }
+.nav-dd > button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-dd > button:hover { background: var(--ground-alt); color: var(--ink); }
+.nav-dd > button svg { width: 14px; height: 14px; transition: transform 0.2s; }
+.nav-dd.open > button { color: var(--accent); background: var(--accent-l); }
+.nav-dd.open > button svg { transform: rotate(180deg); }
+.nav-dd-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease), visibility 0.2s;
+  /* a dropdown must declare that it paints above its siblings — never rely on DOM order,
+     which loses to any later positioned element (see the hub-header note in hub.css) */
+  z-index: 1;
+}
+.nav-dd.open .nav-dd-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+.nav-dd-panel a {
+  display: block;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  border-radius: 8px;
+  text-decoration: none;
+}
+.nav-dd-panel a:hover { background: var(--ground-alt); color: var(--accent); text-decoration: none; }
+.nav-dd-panel a span { display: block; font-size: 12px; font-weight: 500; color: var(--ink3); margin-top: 2px; }
+
+.nav-toggle {
+  display: none;
+  margin-left: auto;
+  width: var(--touch);
+  height: var(--touch);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.nav-toggle svg { width: 20px; height: 20px; color: var(--ink); }
+
+/* Breadcrumb */
+.breadcrumb {
+  padding: 20px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+/* Touch targets: sweep at 390px measured these at 16-26px tall. Padding+negative margin grows
+   the hit area to ~40px without shifting a single pixel of layout. */
+.breadcrumb a { color: var(--ink2); font-weight: 600; padding: 10px 6px; margin: -10px -6px; }
+.breadcrumb a:hover { color: var(--accent); text-decoration: none; }
+/* The separator inherits the breadcrumb's own ink rather than the --line2 hairline it used
+   to borrow (1.47:1 on paper). axe never flagged it — axe 4.12.1 skips punctuation-only text
+   nodes — and a bare "›" is defensible as decoration, so this is craft, not a WCAG citation:
+   no hairline token should ever be doing a text colour's job. --ink3 is 5.04:1 and still the
+   lightest of the three breadcrumb inks, so the crumb hierarchy is unchanged. */
+.breadcrumb .sep { color: var(--ink3); user-select: none; }
+.breadcrumb .current { color: var(--ink); font-weight: 600; }
+
+/* Hero */
+.hero { padding: 48px 0 40px; }
+.hero-compact { padding: 32px 0 24px; }
+/* Kicker — a typeset section mark, not a SaaS pill. */
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 18px;
+}
+/* Spot-ink mark before the tool-page kicker: an 18×4 press bar in the category's ink.
+   body[data-cat] is stamped by _build/gen_spotink.mjs from the registry — never by hand. */
+body[data-cat] .tool-head .kicker::before {
+  content: ""; width: 18px; height: 4px; border-radius: 2px; margin-right: 4px;
+  background: var(--spot, var(--ink3));
+}
+body[data-cat="organize"] { --spot: var(--spot-organize); }
+body[data-cat="convert"]  { --spot: var(--spot-convert); }
+body[data-cat="edit"]     { --spot: var(--spot-edit); }
+body[data-cat="optimize"] { --spot: var(--spot-optimize); }
+body[data-cat="security"] { --spot: var(--spot-security); }
+body[data-cat="images"]   { --spot: var(--spot-images); }
+body[data-cat="legal"]    { --spot: var(--spot-legal); }
+h1.htitle {
+  font-family: var(--serif);
+  font-size: clamp(34px, 5.5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.06;
+  color: var(--ink);
+  max-width: 760px;
+}
+h1.htitle em { font-style: italic; color: inherit; }
+.lead {
+  font-size: clamp(16px, 2.2vw, 19px);
+  color: var(--ink2);
+  margin-top: 16px;
+  max-width: 600px;
+  line-height: 1.65;
+  font-weight: 500;
+}
+.lead b { color: var(--ink); font-weight: 700; }
+/* Text for screen readers only. Needed because a table header must have discernible TEXT —
+   an aria-label does not satisfy axe's empty-table-header, as the comparison tables' blank
+   corner cell proved. Not `display:none`/`visibility:hidden`, which remove it from the
+   accessibility tree along with the pixels. */
+.vh {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+.badge-lite {
+  display: inline-block;
+  background: var(--warn-bg);
+  border: 1px solid #FDE68A;
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+/* Trust pills */
+.trust-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+.trust-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 10px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.trust-pill svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* Search */
+.search-wrap { margin-top: 32px; max-width: 480px; position: relative; }
+.search-wrap svg {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: var(--ink3);
+  pointer-events: none;
+}
+.search-input {
+  width: 100%;
+  border: 1px solid var(--line2);
+  border-radius: 12px;
+  padding: 14px 16px 14px 48px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--card);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-shadow: var(--shadow-sm);
+}
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.search-input::placeholder { color: var(--ink3); }
+.search-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--ink2);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* Tool cards (hub) */
+.cat-section { margin-bottom: 48px; }
+.cat-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.cat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--accent-l);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.cat-icon svg { width: 22px; height: 22px; }
+.cat-head h2 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+.cat-head p { font-size: 13px; color: var(--ink2); font-weight: 500; margin-top: 2px; }
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 14px;
+}
+.tool-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), transform 0.2s var(--ease);
+  box-shadow: var(--shadow-sm);
+}
+.tool-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+  text-decoration: none;
+  color: inherit;
+}
+.tool-card .tc-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  background: var(--ground-alt);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--accent);
+  transition: background 0.2s, border-color 0.2s;
+}
+.tool-card:hover .tc-icon { background: var(--accent-l); border-color: rgba(var(--accent-rgb), 0.2); }
+.tool-card .tc-icon svg { width: 22px; height: 22px; }
+.tool-card .tc-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+.tool-card .tc-desc { font-size: 13px; color: var(--ink2); margin-top: 4px; line-height: 1.45; font-weight: 500; }
+
+.featured-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.featured-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.2s var(--ease);
+  box-shadow: var(--shadow-sm);
+}
+.featured-card:hover {
+  border-color: var(--accent);
+  background: var(--accent-l);
+  text-decoration: none;
+  color: inherit;
+  transform: translateY(-1px);
+}
+.featured-card .fc-icon { color: var(--accent); flex-shrink: 0; }
+.featured-card .fc-icon svg { width: 24px; height: 24px; }
+.featured-card .fc-name { font-size: 14px; font-weight: 700; }
+.featured-card .fc-desc { font-size: 12px; color: var(--ink2); margin-top: 1px; }
+
+/* Tool page layout */
+.tool-layout {
+  /* Single column: the tool IS the page. It used to share the row with a 280px sidebar while
+     sitting above ~15KB of marketing — the job was the smallest thing on screen. */
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  align-items: start;
+}
+.tool-layout > * {
+  /* grid items default to min-width:auto and refuse to shrink below their widest
+     descendant — with a loaded document that forced 600px layouts on 390px phones */
+  min-width: 0;
+  margin: 24px 0 48px;
+}
+.tool-head { margin-bottom: 20px; }
+.tool-head h1 {
+  font-family: var(--serif);
+  font-size: clamp(30px, 4.5vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  color: var(--ink);
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+/* The tool's own icon, in its category's spot ink, beside the title — the hub's colour
+   system continues onto the page you land on instead of dying at the click.
+   Stamped by _build/gen_spotink.mjs from icons.mjs + the registry. */
+.hero-ic {
+  width: 46px; height: 46px; border-radius: 11px; flex: 0 0 auto;
+  background: var(--spot, var(--ink)); display: grid; place-items: center;
+}
+.hero-ic svg { width: 25px; height: 25px; color: #fff; stroke-width: 1.75; }
+@media (max-width: 560px) { .hero-ic { width: 38px; height: 38px; border-radius: 9px; } .hero-ic svg { width: 21px; height: 21px; } }
+.tool-head .tool-intro {
+  font-size: 15px;
+  color: var(--ink2);
+  margin-top: 10px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+.tool-head .tool-intro b { color: var(--ink); font-weight: 700; }
+
+.tool-card-panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.tool-card-body { padding: 28px; }
+
+.tool-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: calc(var(--nav-h) + 20px); }
+.sidebar-block {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-block h3 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 12px;
+}
+.sidebar-links { display: flex; flex-direction: column; gap: 4px; }
+.sidebar-links a {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  padding: 8px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-links a:hover { background: var(--ground-alt); color: var(--accent); text-decoration: none; }
+.privacy-mini { font-size: 13px; color: var(--ink2); line-height: 1.55; font-weight: 500; }
+.privacy-mini b { color: var(--ink); font-weight: 700; }
+.privacy-mini .lock-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--ok-bg);
+  color: var(--ok);
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+}
+.privacy-mini .lock-icon svg { width: 18px; height: 18px; }
+
+/* Dropzone — a sheet of paper, not a dashed box. Every competitor draws the dashed rectangle;
+   we hand you a stack of pages. Two pseudo-element sheets sit behind the real one, slightly
+   fanned; hover fans them further and lifts the top sheet; drag-over is the one green moment
+   (green = "this device takes the file"). */
+.drop {
+  position: relative;
+  z-index: 0;
+  border: 1px solid var(--line2);
+  border-radius: 3px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  padding: 56px 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.25s var(--ease), background 0.25s var(--ease), transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.drop::before, .drop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--dur-3) var(--ease);
+  pointer-events: none;
+}
+.drop::before { transform: rotate(-1.3deg) translateY(4px); }
+.drop::after  { transform: rotate(0.9deg) translateY(7px); }
+/* Rotation is width-times-sine: the same 1.3deg that reads as a neat paper stack at 420px puts
+   the sheet corners ~19px above a 1000px-wide drop, where they cross the top edge and look like
+   a bug, not craft. Wide workbench drops get proportionally gentler sheets. */
+@media (min-width: 900px) {
+  .drop::before { transform: rotate(-0.45deg) translateY(3px); }
+  .drop::after  { transform: rotate(0.3deg) translateY(5px); }
+  .drop:hover::before, .drop:focus-visible::before { transform: rotate(-0.7deg) translate(-3px, 4px); }
+  .drop:hover::after,  .drop:focus-visible::after  { transform: rotate(0.55deg) translate(3px, 6px); }
+  .drop.over::before { transform: rotate(-0.85deg) translate(-4px, 5px); }
+  .drop.over::after  { transform: rotate(0.7deg) translate(4px, 7px); }
+}
+.drop:hover, .drop:focus-visible {
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.drop:hover::before, .drop:focus-visible::before { transform: rotate(-2.1deg) translate(-4px, 6px); }
+.drop:hover::after,  .drop:focus-visible::after  { transform: rotate(1.7deg) translate(4px, 9px); }
+.drop.over {
+  border-color: var(--local);
+  transform: translateY(-2px) scale(1.005);
+  box-shadow: 0 0 0 3px rgba(14, 124, 87, 0.16), var(--shadow-lg);
+}
+.drop.over::before { transform: rotate(-2.6deg) translate(-6px, 7px); }
+.drop.over::after  { transform: rotate(2.1deg) translate(6px, 10px); }
+.drop.has-file {
+  border-color: var(--local-ln);
+  background: var(--ok-bg);
+}
+.drop .dz-ic {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  display: grid;
+  place-items: center;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow);
+  color: var(--accent);
+  transition: transform 0.3s var(--ease);
+}
+.drop.over .dz-ic { transform: scale(1.08) translateY(-4px); }
+.drop .dz-ic svg { width: 32px; height: 32px; }
+.drop .dz-t { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+.drop .dz-t b { color: var(--accent); font-weight: 800; }
+.drop .dz-s { font-size: 14px; color: var(--ink2); margin-top: 8px; font-weight: 500; max-width: 360px; }
+.drop input[type=file] { display: none; }
+
+/* Messages */
+.msg {
+  margin-top: 20px;
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.55;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.msg .mi { flex: 0 0 auto; line-height: 1.2; }
+.msg .mi svg { width: 20px; height: 20px; }
+.msg.err { background: var(--err-bg); color: #991B1B; border: 1px solid #FECACA; }
+.msg.err .mi { color: var(--err); }
+.msg.ok, .msg.success-panel {
+  background: var(--ok-bg);
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+  padding: 22px 24px;
+  flex-direction: column;
+  align-items: stretch;
+}
+.msg.success-panel .success-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.msg.success-panel .success-check {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.msg.success-panel .success-check svg { width: 24px; height: 24px; }
+.msg.success-panel .success-title { font-size: 17px; font-weight: 800; display: block; letter-spacing: -0.02em; }
+.msg.success-panel .success-sub { font-size: 14px; margin-top: 4px; font-weight: 500; opacity: 0.9; }
+.msg.success-panel .success-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; }
+.msg.warn { background: var(--warn-bg); color: #92400E; border: 1px solid #FDE68A; }
+.msg[hidden] { display: none !important; }
+
+/* Forms */
+.fld { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; margin-top: 18px; }
+.fld label { font-size: 13px; font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+.txtin, select.txtin, textarea.txtin {
+  border: 1px solid var(--line2);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  outline: 0;
+  background: var(--card);
+  color: var(--ink);
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.txtin:focus, select.txtin:focus, textarea.txtin:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.txtin.mono { font-family: var(--mono); font-size: 14px; }
+.hint { font-size: 13px; color: var(--ink2); font-weight: 500; line-height: 1.5; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.modes { display: flex; gap: 10px; flex-wrap: wrap; }
+.mode {
+  flex: 1;
+  min-width: 160px;
+  border: 1px solid var(--line2);
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  cursor: pointer;
+  transition: 0.15s var(--ease);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.mode:hover { border-color: var(--accent); }
+.mode.on { border-color: var(--accent); border-width: 2px; background: var(--accent-l); }
+.mode input { margin-top: 4px; accent-color: var(--accent); width: 18px; height: 18px; }
+.mode .mt { font-size: 14px; font-weight: 700; display: block; }
+.mode .md { font-size: 13px; color: var(--ink2); margin-top: 3px; display: block; font-weight: 500; }
+
+/* Buttons */
+.actionrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.summ { font-size: 14px; font-weight: 600; color: var(--ink2); }
+.summ b { color: var(--ink); }
+.actionrow .spacer { flex: 1; }
+.btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 14px 28px;
+  min-height: var(--touch);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #fff;
+  background: var(--accent);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), transform 0.15s var(--ease), box-shadow 0.15s var(--ease);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.2);
+}
+.btn:hover:not(:disabled) {
+  background: var(--accent-d);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.28);
+}
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn.ghost {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line2);
+  box-shadow: none;
+}
+.btn.ghost:hover:not(:disabled) { background: var(--ground-alt); border-color: var(--accent); color: var(--accent); box-shadow: none; }
+.btn.sm { padding: 10px 16px; font-size: 14px; min-height: 40px; }
+.btn.dl { background: var(--ok); box-shadow: 0 1px 2px rgba(5, 150, 105, 0.2); }
+.btn.dl:hover:not(:disabled) { background: #047857; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.28); }
+.btn .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* File list */
+.filelist { list-style: none; margin: 20px 0 0; display: flex; flex-direction: column; gap: 8px; }
+.frow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--ground-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+.frow.bad { border-color: #FECACA; background: var(--err-bg); }
+.frow .fico {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.frow.bad .fico { background: var(--err); }
+.frow .fmeta { flex: 1; min-width: 0; overflow: hidden; }
+.frow .fname {
+  /* block, not inline: ellipsis/overflow silently DON'T APPLY to inline elements, so a long
+     filename or bookmark title bled past the row and forced horizontal scroll on phones */
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.frow .fsub { font-size: 12px; color: var(--ink2); margin-top: 2px; font-weight: 500; }
+.frow .fpages {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink2);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+.facts { display: flex; gap: 4px; }
+.icbtn {
+  border: 1px solid var(--line2);
+  background: var(--card);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  color: var(--ink2);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.icbtn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--accent-l); }
+.icbtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* Drag-to-reorder affordance on file rows */
+.fgrip {
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 auto; width: 18px; align-self: stretch;
+  color: #b6bcc7; cursor: grab; touch-action: none;
+}
+.fgrip:hover { color: var(--ink2); }
+.frow-drag { cursor: grab; }
+.frow-drag:active { cursor: grabbing; }
+.frow-drag .icbtn { cursor: pointer; }
+.frow.dragging { opacity: 0.45; border-style: dashed; }
+.frow.drag-over { box-shadow: inset 0 3px 0 var(--accent); border-color: var(--accent); }
+.reorder-hint { display: flex; align-items: center; gap: 6px; margin: 10px 2px 4px; }
+.reorder-hint .fgrip { cursor: default; width: 16px; color: var(--ink2); }
+
+/* Working / progress */
+.working {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink2);
+  background: var(--ground-alt);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+}
+.working[hidden] { display: none !important; }
+.bar {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--line);
+  overflow: hidden;
+  flex: 1;
+  min-width: 100px;
+}
+.bar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-d));
+  width: 0%;
+  transition: width 0.35s var(--ease);
+}
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.step {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.step .sn {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 16px;
+  color: #fff;
+  background: var(--accent);
+}
+.step h3 { font-size: 16px; font-weight: 800; margin: 16px 0 8px; letter-spacing: -0.02em; }
+.step p { font-size: 14px; color: var(--ink2); line-height: 1.6; font-weight: 500; }
+
+/* Privacy block */
+.privacy-block {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  box-shadow: var(--shadow);
+}
+.privacy-block h2 {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+}
+.privacy-block .priv-lead {
+  font-size: 16px;
+  color: var(--ink2);
+  margin-bottom: 24px;
+  line-height: 1.65;
+  font-weight: 500;
+  max-width: 640px;
+}
+.privacy-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.privacy-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 15px;
+  color: var(--ink2);
+  line-height: 1.55;
+  font-weight: 500;
+}
+.privacy-list li .check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ok-bg);
+  color: var(--ok);
+  display: grid;
+  place-items: center;
+}
+.privacy-list li .check svg { width: 14px; height: 14px; }
+.privacy-list li b { color: var(--ink); font-weight: 700; }
+.privacy-note {
+  margin-top: 20px;
+  padding: 16px 18px;
+  background: var(--ground-alt);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--ink2);
+  line-height: 1.55;
+  font-weight: 500;
+  border: 1px solid var(--line);
+}
+
+/* FAQ */
+.faq { display: flex; flex-direction: column; gap: 8px; }
+.faq details {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--card);
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.faq details[open] { border-color: var(--accent); }
+.faq summary {
+  padding: 18px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink);
+  transition: background 0.15s;
+}
+.faq summary:hover { background: var(--ground-alt); }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary .faq-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--accent-l);
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.faq details[open] summary .faq-icon { transform: rotate(45deg); }
+.faq .fa {
+  padding: 0 20px 20px 62px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink2);
+  font-weight: 500;
+}
+
+/* Related */
+.related { display: flex; gap: 8px; flex-wrap: wrap; }
+.related a {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 16px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 100px;
+  color: var(--ink2);
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.related a:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-l); text-decoration: none; }
+
+/* Compare */
+.compare-panes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+.compare-pane { border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; background: var(--card); }
+.compare-pane h2 { font-size: 12px; font-weight: 700; padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--ink2); background: var(--ground-alt); }
+.compare-pane canvas { width: 100%; display: block; }
+
+/* ── Workbench (upload → configure → result) ── */
+.wb-stage[hidden] { display: none !important; }
+.wb-files { list-style: none; margin: 0 0 18px; display: flex; flex-direction: column; gap: 8px; }
+.wb-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 14px 0; }
+.wb-toolbar .spacer { flex: 1; }
+.wb-add-more {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px dashed var(--line2); background: var(--ground-alt2);
+  color: var(--ink2); font-size: 14px; font-weight: 600;
+  border-radius: var(--radius-sm); padding: 10px 16px; cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.wb-add-more:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Page thumbnails */
+.pgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin: 16px 0; }
+.pgrid.lg { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.pthumb {
+  position: relative;
+  background: var(--card);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 8px 8px 6px;
+  text-align: center;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s, opacity 0.2s;
+  user-select: none;
+}
+.pthumb.clickable { cursor: pointer; }
+.pthumb.grab { cursor: grab; }
+.pthumb.grab:active { cursor: grabbing; }
+.pthumb:hover { border-color: var(--line2); box-shadow: var(--shadow-sm); }
+.pthumb.sel { border-color: var(--accent); background: var(--accent-l); }
+.pthumb.deleted { opacity: 0.4; }
+.pthumb.deleted .pcanvas { filter: grayscale(1); }
+.pthumb.dragging { opacity: 0.5; border-style: dashed; }
+.pthumb.dragover { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.pthumb .pcanvas {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 60px;
+  display: flex; align-items: center; justify-content: center;
+}
+.pthumb .pcanvas canvas { width: 100%; height: auto; display: block; transition: transform 0.25s var(--ease); }
+.pthumb .pn { font-size: 11px; font-weight: 700; color: var(--ink2); margin-top: 6px; display: block; }
+.pthumb .pbadge {
+  position: absolute; top: 4px; left: 4px; z-index: 2;
+  background: var(--accent); color: #fff;
+  font-size: 10px; font-weight: 800;
+  border-radius: 6px; padding: 2px 7px;
+  box-shadow: var(--shadow-sm);
+}
+.pthumb .pdel {
+  position: absolute; top: 4px; right: 4px; z-index: 2;
+  width: 24px; height: 24px; border-radius: 7px;
+  border: 1px solid var(--line2); background: rgba(255,255,255,0.95);
+  color: var(--ink2); font-size: 12px; line-height: 1;
+  display: grid; place-items: center; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.pthumb .pdel:hover { color: var(--err); border-color: var(--err); background: var(--err-bg); }
+.pthumb .prot {
+  position: absolute; bottom: 26px; right: 6px; z-index: 2;
+  width: 26px; height: 26px; border-radius: 7px;
+  border: 1px solid var(--line2); background: rgba(255,255,255,0.95);
+  color: var(--ink2); font-size: 13px;
+  display: grid; place-items: center; cursor: pointer;
+}
+.pthumb .prot:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Result panel */
+.result-panel {
+  border: 1px solid #A7F3D0;
+  background: var(--ok-bg);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin-top: 8px;
+}
+.result-head { display: flex; align-items: center; gap: 14px; }
+.result-head .success-check {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--ok); color: #fff;
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.result-head .success-check svg { width: 24px; height: 24px; }
+.result-title { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: #065F46; }
+.result-sub { font-size: 14px; font-weight: 600; color: #047857; margin-top: 2px; word-break: break-all; }
+.result-stats { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.result-stat {
+  font-size: 13px; font-weight: 500; color: #065F46;
+  background: #fff; border: 1px solid #A7F3D0;
+  border-radius: 100px; padding: 6px 14px;
+}
+.result-stat b { font-weight: 800; }
+.result-preview { margin-top: 18px; }
+.result-prev-label { font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: #047857; margin-bottom: 10px; }
+.result-pages { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+.result-page {
+  flex: 0 0 auto; width: 120px;
+  background: #fff; border: 1px solid #A7F3D0; border-radius: 8px;
+  padding: 6px; text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.result-page canvas { width: 100%; height: auto; display: block; border-radius: 3px; }
+.result-page .pn { font-size: 10px; font-weight: 700; color: var(--ink3); display: block; margin-top: 4px; }
+.result-page.more {
+  display: grid; place-items: center;
+  font-size: 13px; font-weight: 700; color: #047857;
+  min-height: 120px;
+}
+.result-ziplist { list-style: none; display: flex; flex-direction: column; gap: 4px; max-height: 220px; overflow: auto; }
+.result-ziplist li {
+  display: flex; justify-content: space-between; gap: 12px;
+  background: #fff; border: 1px solid #A7F3D0; border-radius: 8px;
+  font-size: 13px; font-weight: 600; padding: 8px 12px; color: #065F46;
+}
+.result-ziplist .zsize { color: #047857; font-weight: 500; flex-shrink: 0; }
+.result-img {
+  max-width: min(320px, 100%); height: auto; display: block; box-sizing: border-box;
+  border: 1px solid #A7F3D0; border-radius: 8px; background: #fff; padding: 6px;
+}
+.result-text {
+  background: #fff; border: 1px solid #A7F3D0; border-radius: 8px;
+  padding: 14px; font-size: 12px; line-height: 1.6; font-family: var(--mono);
+  max-height: 240px; overflow: auto; white-space: pre-wrap; word-break: break-word;
+  color: var(--ink);
+}
+.result-note { margin-top: 14px; color: #065F46; }
+.result-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+/* Preview button (leads people to see the PDF before download) */
+.btn.preview {
+  background: #fff;
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
+  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.12);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn.preview:hover:not(:disabled) { background: rgba(var(--accent-rgb), 0.06); box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.18); }
+.pv-eye { width: 18px; height: 18px; flex: 0 0 auto; }
+.result-pages.clickable { cursor: zoom-in; }
+.result-pages.clickable .result-page { transition: transform .12s ease, box-shadow .12s ease; }
+.result-pages.clickable:hover .result-page { box-shadow: 0 4px 14px rgba(17, 24, 39, 0.12); }
+
+/* Full-screen native PDF preview modal */
+.pv-back {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(17, 24, 39, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  padding: max(16px, 3vh) max(12px, 3vw);
+  animation: pv-fade .12s ease;
+}
+@keyframes pv-fade { from { opacity: 0; } to { opacity: 1; } }
+.pv-modal {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  width: min(1080px, 96vw); height: min(92vh, 1200px);
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+}
+.pv-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px 10px 16px;
+  border-bottom: 1px solid var(--line); background: #fff;
+}
+.pv-title { font-weight: 700; color: var(--ink); font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 46vw; }
+.pv-spacer { flex: 1; }
+.pv-openlink { color: var(--ink2); font-size: 13px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.pv-openlink:hover { color: var(--accent); }
+.btn.dl.sm { padding: 8px 14px; font-size: 14px; }
+.pv-close {
+  border: 1px solid var(--line); background: #fff; color: var(--ink2);
+  width: 34px; height: 34px; border-radius: 9px; cursor: pointer; font-size: 15px; line-height: 1;
+  flex: 0 0 auto;
+}
+.pv-close:hover { background: var(--ground-alt); color: var(--ink); }
+
+/* paging toolbar */
+.pv-nav {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--ground-alt);
+}
+.pv-navbtn {
+  min-width: 34px; height: 32px; padding: 0 10px;
+  border: 1px solid var(--line); background: #fff; color: var(--ink);
+  border-radius: 8px; cursor: pointer; font-size: 17px; line-height: 1; font-weight: 700;
+}
+.pv-navbtn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.pv-navbtn:disabled { opacity: .4; cursor: default; }
+.pv-pagelbl { min-width: 66px; text-align: center; font-weight: 700; color: var(--ink); font-size: 14px; }
+.pv-zoomlbl { min-width: 48px; text-align: center; color: var(--ink2); font-size: 13px; font-weight: 600; }
+.pv-navsep { width: 1px; height: 22px; background: var(--line); margin: 0 4px; }
+
+/* scrollable page area */
+.pv-body { flex: 1; min-height: 0; overflow: auto; background: #525659; }
+.pv-canvas-host { min-height: 100%; display: flex; align-items: flex-start; justify-content: center; padding: 20px; box-sizing: border-box; }
+.pv-page-canvas { height: auto; background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); border-radius: 2px; display: block; }
+.pv-loading, .pv-error { color: #fff; align-self: center; margin: auto; font-size: 14px; padding: 40px 20px; text-align: center; }
+.pv-error a, .pv-loading a { color: #fff; text-decoration: underline; }
+.pv-imgbody { display: flex; align-items: center; justify-content: center; padding: 20px; }
+.pv-img { max-width: 100%; max-height: 100%; object-fit: contain; background: #fff; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45); border-radius: 2px; }
+
+/* Clickable ZIP entries (click a file to preview it) */
+.result-ziplist li.zpreview { cursor: zoom-in; border-radius: 8px; }
+.result-ziplist li.zpreview:hover { background: var(--accent-l); }
+.result-ziplist .zeye { color: var(--accent); font-weight: 700; font-size: 12px; margin-left: 8px; white-space: nowrap; }
+@media (max-width: 640px) {
+  .pv-title { max-width: 30vw; }
+  .pv-openlink { display: none; }
+}
+
+/* Live option previews */
+.preview-stage {
+  position: relative;
+  margin: 16px auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--ground-alt);
+  overflow: hidden;
+  max-width: 100%;
+  width: fit-content;
+}
+.preview-stage canvas { display: block; max-width: 100%; }
+.preview-overlay { position: absolute; inset: 0; pointer-events: none; }
+
+/* Position picker (3×3) */
+.pospick { display: grid; grid-template-columns: repeat(3, 44px); gap: 6px; }
+.pospick button {
+  width: 44px; height: 36px; border-radius: 8px;
+  border: 1px solid var(--line2); background: var(--card); cursor: pointer;
+  display: grid; place-items: center; color: var(--ink3);
+  transition: 0.15s;
+}
+.pospick button::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: currentColor; }
+.pospick button:hover { border-color: var(--accent); color: var(--accent); }
+.pospick button.on { border-color: var(--accent); background: var(--accent-l); color: var(--accent); }
+
+/* Crop box */
+.cropbox {
+  position: absolute; border: 2px solid var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+  cursor: move; touch-action: none;
+}
+.cropbox .cbh {
+  position: absolute; width: 14px; height: 14px;
+  background: #fff; border: 2px solid var(--accent); border-radius: 50%;
+  touch-action: none;
+}
+.cropbox .cbh.nw { top: -8px; left: -8px; cursor: nwse-resize; }
+.cropbox .cbh.ne { top: -8px; right: -8px; cursor: nesw-resize; }
+.cropbox .cbh.sw { bottom: -8px; left: -8px; cursor: nesw-resize; }
+.cropbox .cbh.se { bottom: -8px; right: -8px; cursor: nwse-resize; }
+.crop-shade { position: absolute; background: rgba(17, 24, 39, 0.45); pointer-events: none; }
+
+/* Signature pad */
+.sigpad-wrap { border: 1px solid var(--line2); border-radius: var(--radius-sm); background: #fff; overflow: hidden; }
+.sigpad-wrap canvas { display: block; width: 100%; touch-action: none; cursor: crosshair; }
+.sig-tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+.sig-tabs button {
+  border: 1px solid var(--line2); background: var(--card); color: var(--ink2);
+  font-size: 13px; font-weight: 700; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+}
+.sig-tabs button.on { border-color: var(--accent); background: var(--accent-l); color: var(--accent); }
+
+/* ── PDF Editor ── */
+.ed-root { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--card); }
+.ed-toolbar {
+  display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;
+  padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--ground-alt);
+  overflow-x: auto; /* narrow laptops scroll the tool row — never wrap Save/Undo off-screen */
+  /* NOT sticky. .ed-root sets overflow:hidden, which makes IT the scrollport for a sticky child —
+     so `top: var(--nav-h)` shoved this bar 64px DOWN out of its flow box, permanently, at every
+     scroll position, where its opaque background painted over the 47px property bar beneath it.
+     That silently made font family, size, colour, bold, italic, shape kind, stroke, fill, pen and
+     highlight controls unclickable for every user at every viewport — while the hero advertised
+     "restyle". The sticky also achieved nothing, since the window was never its scrollport. */
+}
+.ed-tool {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid transparent; background: none; color: var(--ink2);
+  font-size: 13px; font-weight: 700; font-family: inherit;
+  border-radius: 8px; padding: 8px 10px; cursor: pointer;
+  transition: 0.12s; white-space: nowrap;
+}
+.ed-tool svg { width: 16px; height: 16px; }
+.ed-tool:hover { background: var(--card); color: var(--ink); border-color: var(--line); }
+.ed-tool.on { background: var(--accent-l); color: var(--accent); border-color: rgba(var(--accent-rgb), 0.3); }
+.ed-tool:disabled { opacity: 0.35; cursor: not-allowed; }
+.ed-sep { width: 1px; height: 24px; background: var(--line); margin: 0 4px; flex-shrink: 0; }
+
+/* ── Ink chrome ── the editor wears the brand: dark ink toolbar, so the white document below
+   is the brightest thing on screen (the Acrobat/Figma move). Green Save reads perfectly on ink.
+   Scoped strictly to .ed-toolbar; the property bar beneath stays light because its controls
+   (font menus, colour wells) belong with the document. */
+.ed-toolbar { background: var(--ink); border-bottom-color: var(--ink); }
+.ed-toolbar .ed-tool { color: rgba(255, 255, 255, 0.70); }
+.ed-toolbar .ed-tool:hover:not(:disabled) { background: rgba(255, 255, 255, 0.10); color: #fff; border-color: transparent; }
+.ed-toolbar .ed-tool.on { background: rgba(255, 255, 255, 0.16); color: #fff; border-color: rgba(255, 255, 255, 0.28); }
+.ed-toolbar .ed-tool:disabled { color: rgba(255, 255, 255, 0.28); opacity: 1; }
+.ed-toolbar .ed-sep { background: rgba(255, 255, 255, 0.18); }
+.ed-toolbar .ed-keep { color: rgba(255, 255, 255, 0.80); }
+.ed-toolbar .ed-changes:not(:empty) {
+  background: rgba(255, 255, 255, 0.10); color: #F5C978;
+  border-color: rgba(245, 201, 120, 0.35);
+}
+.ed-toolbar .spacer { flex: 1; }
+.ed-save { padding: 9px 18px; font-size: 14px; }
+.ed-propbar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--card);
+  font-size: 13px; font-weight: 600; color: var(--ink2);
+}
+.ed-propbar[hidden] { display: none; }
+.ed-propbar select, .ed-propbar input[type=number] {
+  border: 1px solid var(--line2); border-radius: 7px; padding: 5px 8px;
+  font-size: 13px; font-weight: 600; font-family: inherit; color: var(--ink); background: #fff;
+}
+.ed-propbar input[type=color] {
+  width: 32px; height: 28px; border: 1px solid var(--line2); border-radius: 7px;
+  padding: 2px; background: #fff; cursor: pointer;
+}
+.ed-propbar .ed-style-btn {
+  width: 30px; height: 28px; border: 1px solid var(--line2); border-radius: 7px;
+  background: #fff; color: var(--ink2); font-size: 13px; cursor: pointer;
+}
+.ed-propbar .ed-style-btn.on { border-color: var(--accent); color: var(--accent); background: var(--accent-l); }
+.ed-viewport {
+  position: relative; overflow: auto; background: #EBEDF0;
+  height: min(72vh, 820px); padding: 24px 12px;
+  overscroll-behavior: contain;
+  touch-action: pan-x pan-y; /* pinches starting in the gutters also reach the editor's zoom */
+}
+/* P1 tool-first: while a document is open, the canvas owns the first viewport.
+   Do NOT sticky the toolbar inside .ed-root — overflow:hidden makes that sticky's scrollport
+   the root itself (historic bug: bar painted over the prop strip). The bar already sits above
+   the canvas in-flow; taller viewport keeps Save on screen without sticky tricks.
+   SEO sections (.unbound-content) stay in the page BELOW the tool — never removed. */
+body.ed-session .ed-viewport { height: min(86vh, 960px); }
+/* ── Mobile session: the page ends at the editor ──────────────────────────────
+   Founder's iPhone screenshot (2026-07-23): mid-session he was looking at the site
+   FOOTER with the editing dock floating over it and a huge blank below. Mechanism:
+   while the keyboard is up, iOS scrolls the page to reveal the focused text, and the
+   dock is viewport-fixed — so once you are past the editor, you are lost in marketing
+   content with editor chrome floating over it. The root fix is not fighting iOS
+   viewport physics; it is that DURING AN ACTIVE SESSION there is nothing below the
+   editor to be lost in. The SEO sections and footer stay in the DOM (crawlers never
+   start a session — this class only exists after a file is loaded) and return the
+   moment the session ends. Desktop keeps everything: no keyboard, no reveal-scroll. */
+@media (max-width: 720px), (pointer: coarse) and (max-width: 1024px) {
+  body.ed-session section.unbound-content,
+  body.ed-session section#privacy,
+  body.ed-session main section.section,
+  body.ed-session footer { display: none; }
+}
+body.ed-session .tool-head { margin-bottom: 6px; }
+body.ed-session .tool-head .kicker { display: none; }
+body.ed-session .tool-head .tool-intro { display: none; }
+body.ed-session .tool-head h1 {
+  font-size: 1.15rem; margin: 0; letter-spacing: -0.02em; line-height: 1.2;
+}
+body.ed-session .tool-card-body { padding: 8px 12px 12px; }
+body.ed-session .breadcrumb { display: none; }
+.ed-pages { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+.ed-page {
+  position: relative; background: #fff;
+  box-shadow: 0 2px 12px rgba(17,24,39,0.14);
+  flex-shrink: 0;
+}
+.ed-page > canvas { display: block; }
+/* Touch rules, learned twice over:
+   - Drag-DRAWING surfaces need touch-action:none, or the browser claims the drag as a pan and
+     fires pointercancel — no box ever committed on a phone (the redact-pdf lesson).
+   - Everything else must allow pan-x pan-y, or a finger on the document cannot scroll it and
+     pinch behaviour gets eaten — the editor "stuck zoomed" trap. Native pinch stays excluded:
+     the editor implements its own document pinch-zoom.
+   .ed-draws marks a surface in a drag-drawing state (redact/crop always; editor only while a
+   shape/highlight/whiteout/draw tool is armed). */
+.ed-overlay { position: absolute; inset: 0; touch-action: pan-x pan-y; }
+.ed-overlay.ed-draws { touch-action: none; }
+.ed-overlay.tool-active { cursor: crosshair; }
+.ed-statusbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 14px; border-top: 1px solid var(--line); background: var(--ground-alt);
+  font-size: 12px; font-weight: 600; color: var(--ink2); flex-wrap: wrap;
+}
+.ed-statusbar .spacer { flex: 1; }
+.ed-zoom { display: flex; align-items: center; gap: 4px; }
+.ed-zoom button {
+  width: 28px; height: 28px; border: 1px solid var(--line2); border-radius: 7px;
+  background: #fff; color: var(--ink2); font-size: 15px; cursor: pointer; line-height: 1;
+}
+.ed-zoom button:hover { color: var(--accent); border-color: var(--accent); }
+.ed-zoom .zlvl { min-width: 48px; text-align: center; }
+.ed-hint-msg { color: var(--accent); font-weight: 700; }
+.ed-fit-btn {
+  border: 1px solid var(--line2); background: #fff; color: var(--ink);
+  border-radius: 7px; padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+  flex-shrink: 0;
+}
+.ed-fit-btn:hover { border-color: var(--ink); }
+
+/* ── Workbench affordances injected by all-tools.js ───────────────────────────
+   These classes are created in JS on EVERY tool page, but they were only ever
+   styled in hub.css — which just 2 of the 34 pages load. The result shipped on
+   29 tool pages: a raw OS-default button (border: 2px outset black, cursor:
+   default, 0 matching rules) sitting on an Ink & Paper layout. Any class the
+   shared tool script can emit must be styled in the shared tool stylesheet. */
+.sample-row { text-align: center; margin: 12px 0 0; }
+.sample-btn {
+  font: inherit; font-size: 13px; font-weight: 700; color: var(--ink2);
+  background: var(--card); border: 1px solid var(--line); border-radius: 999px;
+  padding: 8px 16px; cursor: pointer;
+  transition: border-color .12s ease, color .12s ease;
+}
+.sample-btn:hover { border-color: var(--ink); color: var(--ink); }
+.sample-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sample-btn:disabled { opacity: .6; cursor: wait; }
+
+/* The honest limit of a tool, stated before you use it — 7 tools pass real copy
+   ("Visual redaction — not certified legal redaction."). It is the privacy/honesty
+   wedge in miniature, so it reads as a deliberate note, not leftover paragraph. */
+.honesty-chip {
+  margin: 10px auto 0; max-width: 46ch; text-align: center;
+  font-size: 12.5px; line-height: 1.45; font-weight: 600; color: var(--ink3);
+}
+
+/* Busy while a document is being opened. Mirrors body.ed-session below: a state
+   class the script sets must actually DO something, or it is a claimed feature
+   that never shipped. */
+body.wb-loading .drop, body.wb-loading .sample-btn { cursor: progress; }
+body.wb-loading .sample-btn { pointer-events: none; opacity: .6; }
+
+/* Tool session chrome — same restraint the editor already uses once you are
+   working on a document: the marketing furniture steps back, the SEO content
+   below the tool is untouched. */
+body.tool-session .kicker { display: none; }
+body.tool-session .breadcrumb { display: none; }
+body.tool-session .tool-head { margin-bottom: 8px; }
+
+
+/* ── Reading an image page (OCR) — the wait must be visible where the user is looking ──
+   An image-only page IS editable: clicking it runs OCR and the text becomes real, editable
+   runs. But that takes a few seconds, and with feedback confined to the status strip the
+   click read as "nothing happened" and users clicked again. Announce it over the page. */
+body.ed-ocr-busy .ed-viewport, body.ed-ocr-busy .ed-page { cursor: progress; }
+/* FIXED, not absolute: .ed-viewport scrolls, so an absolutely-positioned badge would
+   scroll out of sight exactly when the user is looking elsewhere on the page. */
+body.ed-ocr-busy::after {
+  content: "Reading the text on this page…";
+  position: fixed; left: 50%; top: 84px; transform: translateX(-50%);
+  z-index: 9999; pointer-events: none;
+  background: var(--ink); color: #fff;
+  font-size: 13px; font-weight: 700; letter-spacing: -0.01em;
+  padding: 9px 16px; border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.22);
+}
+@media (prefers-reduced-motion: no-preference) {
+  body.ed-ocr-busy::after { animation: ocrPulse 1.6s ease-in-out infinite; }
+  @keyframes ocrPulse { 0%,100% { opacity: 1 } 50% { opacity: .72 } }
+}
+
+/* Editor elements */
+.ed-el { position: absolute; touch-action: none; }
+.ed-el.selected { outline: 2px solid var(--accent); outline-offset: 0; z-index: 6; }
+/* Typing: dashed whisper outline — never a solid card frame over the page */
+.ed-el.editing { outline: none; z-index: 7; }
+.ed-el.t-text.editing { outline: 1px dashed rgba(23, 23, 26, 0.28); outline-offset: 1px; }
+.ed-el.editing .ed-handle, .ed-el.editing .ed-del { display: none !important; }
+.ed-el.t-text.editing .ed-handle.e, .ed-el.t-text.editing .ed-handle.w, .ed-el.t-text.editing .ed-handle.s { display: block !important; }
+.ed-el.committed { outline: none; }
+.ed-changes { font-size: 12.5px; opacity: .75; white-space: nowrap; }
+.ed-el .ed-handle {
+  position: absolute; width: 12px; height: 12px;
+  background: #fff; border: 2px solid var(--accent); border-radius: 50%;
+  z-index: 7; display: none; touch-action: none;
+}
+.ed-el.selected .ed-handle { display: block; }
+.ed-el .ed-handle.se { right: -7px; bottom: -7px; cursor: nwse-resize; }
+.ed-el .ed-handle.e { right: -7px; top: 50%; margin-top: -6px; cursor: ew-resize; }
+.ed-el .ed-handle.w { left: -7px; top: 50%; margin-top: -6px; cursor: ew-resize; }
+.ed-el .ed-handle.s { bottom: -7px; left: 50%; margin-left: -6px; cursor: ns-resize; }
+.ed-ovf {
+  position: absolute; right: -9px; bottom: -9px; width: 18px; height: 18px;
+  display: grid; place-items: center; background: var(--ink); color: #fff;
+  border: 1.5px solid var(--local); border-radius: 4px;
+  font: 700 13px/1 var(--sans); cursor: pointer; z-index: 8;
+}
+/* display:grid above beats the UA [hidden] rule — without this, the "+" overflow badge
+   sat on EVERY text box forever (live bug: a phantom black square on each edit). */
+.ed-ovf[hidden] { display: none; }
+.ed-el .ed-del {
+  position: absolute; top: -14px; right: -14px; z-index: 8;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink); color: #fff; border: 2px solid #fff;
+  font-size: 12px; line-height: 1; display: none;
+  place-items: center; cursor: pointer; box-shadow: var(--shadow);
+}
+.ed-el.selected .ed-del { display: grid; }
+.ed-text {
+  min-width: 24px; min-height: 1em;
+  outline: none; white-space: pre-wrap; word-break: break-word;
+  cursor: move; line-height: 1.25;
+  /* Transparent — furniture whiteout covers original ink. Solid plates read as
+     floating white cards (founder rejection of the v63 opaque-box look). */
+  background: transparent;
+}
+.ed-text:focus { cursor: text; }
+.ed-text.empty::before { content: "Type here"; color: #9CA3AF; }
+.ed-shape { cursor: move; }
+.ed-shape svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ed-img { cursor: move; }
+.ed-img img {
+  width: 100%; height: 100%; display: block;
+  /* Parent box owns the drag — native <img> drag flashes a speckled ghost on
+     transparent PNGs (founder: "world map" that appears while dragging). */
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Signature/image placement stamp: dashed frame + green + follows the pointer.
+   No solid grey plate — that read as a "world map" fog while moving to place. */
+.ed-place-ghost {
+  position: fixed; left: 0; top: 0; z-index: 95;
+  pointer-events: none; transform: translate(-50%, -50%);
+}
+.ed-place-frame {
+  display: flex; align-items: center; justify-content: center;
+  border: 1.5px dashed var(--local);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+.ed-place-frame img {
+  display: block; max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  opacity: 0.9;
+}
+.ed-place-plus {
+  position: absolute; right: -11px; top: -11px;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--local); color: #fff;
+  font-size: 17px; font-weight: 800; line-height: 24px; text-align: center;
+  box-shadow: 0 1px 4px rgba(14, 124, 87, 0.45);
+  border: 2px solid #fff;
+}
+.ed-overlay.ed-placing,
+.ed-overlay.ed-placing.tool-active { cursor: crosshair; }
+
+/* Editor modal (signature) */
+.ed-modal-back {
+  position: fixed; inset: 0; z-index: 90;
+  background: rgba(17,24,39,0.5);
+  display: grid; place-items: center; padding: 20px;
+}
+.ed-modal {
+  background: #fff; border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  width: min(520px, 100%); padding: 22px;
+}
+.ed-modal h3 { font-size: 17px; font-weight: 800; margin-bottom: 14px; letter-spacing: -0.02em; }
+.ed-modal .ed-modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+
+@media (max-width: 720px) {
+  .ed-viewport { height: 64vh; }
+  .result-actions .btn { width: 100%; }
+  .pgrid { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); }
+}
+
+.ad-slot {
+  position: relative;
+  border: 1px dashed var(--line2);
+  border-radius: var(--radius);
+  background: var(--ground-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--ink3);
+  margin: 40px 0;
+}
+.ad-slot::before {
+  content: "Advertisement";
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ad-slot .ad-note { font-size: 13px; font-weight: 600; }
+.ad-slot.leaderboard { min-height: 90px; }
+
+/* Footer */
+footer {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  background: var(--ground-alt);
+}
+.foot-in { max-width: var(--max); margin: 0 auto; padding: 48px 24px; }
+.foot-top {
+  display: grid;
+  grid-template-columns: 1.2fr 2fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+.foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.foot-brand b { font-size: 16px; font-weight: 800; letter-spacing: -0.02em; }
+.foot-txt { font-size: 14px; color: var(--ink2); line-height: 1.7; font-weight: 500; max-width: 360px; }
+.foot-cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.foot-cat h4 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 12px;
+}
+.foot-cat a {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink2);
+  padding: 4px 0;
+  text-decoration: none;
+}
+.foot-cat a:hover { color: var(--accent); text-decoration: none; }
+.foot-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
+.foot-links a { font-size: 14px; font-weight: 600; }
+.foot-meta { font-size: 12px; color: var(--ink3); font-weight: 500; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .tool-layout { grid-template-columns: 1fr; }
+  .tool-sidebar { position: static; flex-direction: row; flex-wrap: wrap; }
+  .tool-sidebar .sidebar-block { flex: 1; min-width: 240px; }
+  .foot-top { grid-template-columns: 1fr; }
+  .foot-cats { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 720px) {
+  .nav-toggle { display: flex; }
+  .nav-menu {
+    display: none;
+    position: absolute;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 16px 20px;
+    box-shadow: var(--shadow-lg);
+    gap: 4px;
+  }
+  .nav-menu.open { display: flex; }
+  .nav-dd-panel {
+    position: static;
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    box-shadow: none;
+    border: none;
+    padding: 0 0 0 12px;
+    display: none;
+  }
+  .nav-dd.open .nav-dd-panel { display: block; }
+  .steps { grid-template-columns: 1fr; }
+  .wrap { padding: 0 16px; }
+  .nav-in { padding: 0 16px; }
+  .tool-card-body { padding: 20px 16px; }
+  .drop { padding: 40px 20px; min-height: 180px; }
+  .btn { width: 100%; }
+  .actionrow .btn { flex: 1; }
+  .compare-panes { grid-template-columns: 1fr; }
+  .foot-cats { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 32px 0 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Blanket safety net: anything we did not think about is stopped dead. KEEP IT — it is why
+     no stray animation can ever ambush someone who asked for stillness. */
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto; }
+  .drop.over .dz-ic { transform: none; }
+  /* …EXCEPT the cross-fade we deliberately substitute for motion. This blanket rule (which
+     predates the motion work) is what actually made the page 100% static under Reduce Motion:
+     even a fade written specifically FOR that mode was being crushed to 0.001ms and never seen.
+     Restoring duration here is deliberate and narrow — these elements only ever run `secfade`,
+     which changes opacity and moves nothing, so the preference is still honoured. */
+  .motion-reduced .in,
+  .motion-reduced .section.in :is(.uc-answer, .uc-fold, .uc-q, .uc-caps-list li),
+  .motion-reduced .sec.in :is(.t, .cat),
+  .motion-reduced .sec.in .wrap > details { animation-duration: 420ms !important; }
+}
+
+/* UnboundPDF footer legal links */
+.foot-legal{display:flex;gap:18px;flex-wrap:wrap;margin:0 0 10px;font-size:.86rem}
+.foot-legal a{color:inherit;opacity:.75;text-decoration:none;padding:10px 6px;margin:-10px -6px}
+.foot-legal a:hover{opacity:1;text-decoration:underline}
+
+/* UnboundPDF per-tool content (How-to + FAQ) */
+.unbound-content{border-top:1px solid var(--line);background:var(--ground-alt)}
+/* The answer-first paragraph — hoisted out of the fold 2026-08-04 so the sentence an answer
+   engine quotes is never behind a click. It is the lead: bigger and darker than body copy. */
+.uc-answer{margin:0 0 18px;max-width:70ch;font-size:1.05rem;line-height:1.65;color:var(--ink);font-weight:500}
+/* The fold. It had NO css at all — it shipped as a bare default browser triangle, which is
+   survivable while open and unacceptable as the closed state's only affordance. */
+.uc-fold{border:1px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.uc-fold-sum{
+  cursor:pointer;list-style:none;display:flex;align-items:center;gap:12px;
+  min-height:44px;padding:13px 16px;font-weight:700;color:var(--ink);
+  font-size:.95rem;letter-spacing:-.01em;border-radius:var(--radius);
+}
+.uc-fold-sum::-webkit-details-marker{display:none}
+.uc-fold-sum:hover{background:var(--ground-alt2)}
+.uc-fold-sum:focus-visible{outline:2px solid var(--ink);outline-offset:-2px}
+.uc-fold-sum::after{
+  content:"";margin-left:auto;flex:0 0 auto;width:8px;height:8px;
+  border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+  transform:rotate(45deg) translate(-2px,-2px);
+  transition:transform var(--dur-2,200ms) var(--ease,ease);
+}
+.uc-fold[open] .uc-fold-sum::after{transform:rotate(-135deg) translate(-3px,-3px)}
+.uc-fold[open] .uc-fold-sum{border-bottom:1px solid var(--line);border-radius:var(--radius) var(--radius) 0 0}
+.uc-fold-body{padding:22px 16px 18px}
+/* two sibling folds since 2026-08-04 (how-to · questions) — the FAQ was nested one level
+   deeper, which put an answer two clicks away once the outer fold closed by default. */
+.uc-fold + .uc-fold{margin-top:12px}
+/* how many questions are in there, computed from the FAQ list — tells you it is worth opening */
+.uc-fold-n{
+  flex:0 0 auto;min-width:22px;padding:2px 7px;border-radius:999px;
+  background:var(--ground-alt);color:var(--ink3);
+  font-size:.75rem;font-weight:700;font-variant-numeric:tabular-nums;text-align:center;
+}
+/* The how-to used to sit in a 1.1fr grid column beside the FAQ; on its own it spans the full
+   1080px wrap, and prose at that measure is unreadable. Constrain the PROSE only — the uses
+   list is chips and is happier wide. */
+.uc-fold-body .uc-steps,
+.uc-fold-body .uc-note,
+.uc-fold-body .uc-uses-lead,
+.uc-fold-body .uc-caps-lead,
+.uc-fold-body .uc-privacy2 p,
+.uc-fold-body .uc-q p{max-width:72ch}
+
+/* ── SPOT-INK CARRY-THROUGH (2026-08-04) ──
+   Every tool page already carries `--spot` on <body> (stamped per category by gen_spotink).
+   The interactive furniture wears it, so an Organize page reads indigo and a Security page
+   reads cyan slate without 33 bespoke layouts. Ink & Paper holds: type stays ink on paper,
+   only the controls take colour. Every fallback is the previous ink, so a page that somehow
+   lost its data-cat degrades to exactly what shipped before. */
+.uc-fold{border-left:3px solid var(--spot,transparent)}
+.uc-fold-sum::after{border-color:var(--spot,var(--ink3))}
+.uc-fold-n{color:var(--spot,var(--ink3))}
+.uc-q summary::before{color:var(--spot,var(--accent))}
+.uc-caps-list li::before{background:var(--spot,var(--ink3))}
+/* the capability list — claims, not tasks, so it is set as a marked list rather than chips */
+.uc-caps{margin:0 0 26px}
+.uc-caps h2{font-family:var(--serif);font-weight:700;letter-spacing:-0.01em;font-size:1.55rem;color:var(--ink);margin:0 0 10px}
+.uc-caps-lead{color:var(--ink2);margin:0 0 14px;line-height:1.6}
+.uc-caps-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:9px 28px}
+.uc-caps-list li{position:relative;padding-left:18px;color:var(--ink);line-height:1.5;font-size:.95rem}
+.uc-caps-list li::before{content:"";position:absolute;left:0;top:.55em;width:8px;height:2px;border-radius:1px}
+@media(max-width:760px){.uc-caps-list{grid-template-columns:1fr}}
+.uc-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px}
+.uc-how h2,.uc-faq h2{font-family:var(--serif);font-weight:700;letter-spacing:-0.01em;font-size:1.55rem;color:var(--ink);margin:0 0 14px}
+.uc-intro{color:var(--ink2);margin:0 0 16px;line-height:1.6}
+.uc-steps{margin:0 0 16px;padding-left:1.25em;color:var(--ink)}
+.uc-steps li{margin:0 0 10px;line-height:1.55}
+.uc-note{background:var(--accent-l);border-left:3px solid var(--accent);padding:10px 14px;border-radius:6px;font-size:.92rem;color:var(--ink)}
+.uc-privacy{font-size:.88rem;color:var(--ink3);margin-top:12px}
+.uc-q{border-bottom:1px solid var(--line);padding:13px 0}
+.uc-q summary{cursor:pointer;font-weight:600;color:var(--ink);list-style:none;padding:10px 0;margin:-4px 0}
+.uc-q summary::-webkit-details-marker{display:none}
+.uc-q summary::before{content:"+ ";color:var(--accent);font-weight:700}
+.uc-q[open] summary::before{content:"\2013 "}
+.uc-q p{margin:9px 0 0;color:var(--ink2);line-height:1.55}
+/* Common uses — a per-tool topical band above the how-to/faq grid. */
+/* P1 content blocks (Search Master Plan): dated freshness marker, privacy-intent H2 with the
+   Privacy Lab as proof, and a lateral cross-link. Green is the one functional colour — it means
+   "runs on your device", which is exactly what the privacy block asserts. */
+.uc-updated{font-size:12px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin:0 0 22px}
+.uc-privacy2{margin:0 0 40px;padding:0 0 36px;border-bottom:1px solid var(--line)}
+.uc-privacy2 h2{font-family:var(--serif);font-weight:700;letter-spacing:-0.01em;font-size:1.55rem;color:var(--ink);margin:0 0 10px}
+.uc-privacy2 p{color:var(--ink2);margin:0;line-height:1.65;max-width:74ch}
+.uc-privacy2 a{color:var(--local);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.uc-also{color:var(--ink2);line-height:1.6;margin:0 0 40px}
+.uc-also a{font-weight:700;text-decoration:underline;text-underline-offset:2px}
+.uc-uses{margin:0 0 40px;padding:0 0 36px;border-bottom:1px solid var(--line)}
+.uc-uses h2{font-family:var(--serif);font-weight:700;letter-spacing:-0.01em;font-size:1.55rem;color:var(--ink);margin:0 0 10px}
+.uc-uses-lead{color:var(--ink2);margin:0 0 18px;line-height:1.6;max-width:70ch}
+.uc-uses-list{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.uc-uses-list li{background:var(--card);border:1px solid var(--line);border-radius:100px;padding:7px 15px;font-size:.9rem;font-weight:600;color:var(--ink)}
+@media(max-width:760px){.uc-grid{grid-template-columns:1fr;gap:28px}}
+
+
+/* Related tools, demoted below the workbench (was a sidebar beside it). */
+.tool-aside { margin: 22px 0 8px; }
+.tool-aside .sidebar-block { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; }
+.tool-aside .sidebar-block h3 { font-size: 11.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; color: var(--ink3); margin: 0 0 10px; }
+/* the base rule is flex-direction:column (it was a sidebar); as a strip it must run in a row */
+.tool-aside .sidebar-links { display: flex; flex-direction: row; flex-wrap: wrap; gap: 8px; }
+.tool-aside .sidebar-links a {
+  font-size: 13px; font-weight: 700; color: var(--ink2); padding: 7px 13px;
+  border: 1px solid var(--line); border-radius: 999px; background: var(--card);
+}
+.tool-aside .sidebar-links a:hover { border-color: var(--ink); color: var(--ink); }
+
+
+/* Editor page navigation — the status bar used to carry a read-only "Page 1 / 6", so a 60-page
+   document could only be reached by scrolling. */
+.ed-pagenav { display: inline-flex; align-items: center; gap: 4px; }
+.ed-pagenav button {
+  width: 26px; height: 26px; border: 1px solid var(--line2); background: var(--card);
+  border-radius: var(--radius-sm); cursor: pointer; font-size: 15px; line-height: 1;
+  color: var(--ink2); display: grid; place-items: center; font-family: var(--sans);
+}
+.ed-pagenav button:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+.ed-pagenav button:disabled { opacity: .4; cursor: default; }
+.ed-pagein {
+  width: 46px; height: 26px; text-align: center; font: inherit; font-size: 12.5px; font-weight: 700;
+  border: 1px solid var(--line2); border-radius: var(--radius-sm); background: var(--card); color: var(--ink);
+  -moz-appearance: textfield;
+}
+.ed-pagein::-webkit-outer-spin-button, .ed-pagein::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ed-pagein:focus { outline: 2px solid var(--ink); outline-offset: 1px; }
+.ed-pagetot { font-size: 12.5px; font-weight: 600; color: var(--ink3); }
+
+
+/* Page-thumbnail move controls. organize-pdf advertised "up/down controls" that did not exist,
+   and its only reorder path was HTML5 drag-and-drop — which never fires on touch, so reordering
+   was impossible on a phone. These are tappable. */
+.pmove {
+  position: absolute; width: 24px; height: 24px; border: 1px solid var(--line2);
+  background: rgba(255,255,255,.94); border-radius: var(--radius-sm); cursor: pointer;
+  font-size: 13px; line-height: 1; color: var(--ink2); display: grid; place-items: center;
+  opacity: 0; transition: opacity .12s var(--ease); font-family: var(--sans);
+}
+.pthumb:hover .pmove, .pthumb:focus-within .pmove { opacity: 1; }
+.pmove:hover { border-color: var(--ink); color: var(--ink); }
+.pmove-up { left: 6px; bottom: 6px; }
+.pmove-dn { left: 34px; bottom: 6px; }
+/* On touch there is no hover — the controls must always be visible or they may as well not exist. */
+@media (hover: none) { .pthumb .pmove { opacity: 1; } }
+
+
+/* merge-pdf is the only tool with three icon buttons per file row, and that pushed .frow's
+   min-content width to ~392px inside a 309px column at 375px — so the "Merge PDFs" button sat
+   50px off-screen and the remove ✕ was entirely unreachable without horizontal scrolling.
+   Let the row wrap instead of forcing the page wider than the phone. */
+@media (max-width: 720px) {
+  /* Long, independent guidance paragraphs need a phone reading flow. `.msg` stays a row for
+     its normal icon + sentence use; only tool prose carrying this hook stacks. */
+  .msg.tool-mobile-prose { flex-direction: column; align-items: stretch; }
+  .msg.tool-mobile-prose > p { width: 100%; min-width: 0; }
+}
+
+@media (max-width: 560px) {
+  .frow { flex-wrap: wrap; row-gap: 10px; }
+  .frow > div { min-width: 0; }
+  .fpages { white-space: normal; }
+  .facts { margin-left: auto; }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   ELEVATION PASS — visual + UX refinement (2026-07-17)
+   Restraint (Linear), typographic hierarchy (Stripe), monochrome-plus-one discipline
+   (Vercel), quiet content-first chrome (iA Writer), thumb-zone mobile (Family/Arc).
+   Brand LOCKED: ink #17171A on paper #FAFAF8, one accent green #0E7C57. No new hues.
+   Additive overrides only — never rewrites the contracts the QA gate depends on.
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* ── Numeric alignment ── figures that sit in columns or update in place must not jitter.
+   Tabular, lining figures everywhere a number is a measurement, count or size. */
+.result-stat, .result-stat b, .result-page .pn, .frow .fpages, .frow .fsub,
+.ed-changes, .ed-zoom .zlvl, .ed-pagetot, .ed-pagein, .pv-pagelbl, .pv-zoomlbl,
+.summ, .summ b, .cat-c, .fmeta, .drop .dz-s, .working, .bar + *, .result-sub,
+.ed-propbar input[type=number], .result-ziplist .zsize, .fpages {
+  font-feature-settings: "tnum" 1, "lnum" 1;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* ── Typography hierarchy ── tighten tracking as size grows (optical, Stripe-style).
+   Display and h1 already carry -0.04/-0.03em; reinforce h2/h3 and open body rhythm. */
+h1.htitle, .h1 { font-feature-settings: "tnum" 1, "ss01" 1, "kern" 1; }
+.section-head h2, .privacy-block h2 { text-wrap: balance; }
+.lead, .tool-head .tool-intro, .sub { text-wrap: pretty; }
+
+/* ── Focus-visible everywhere ── keyboard a11y as a first-class state.
+   Ink ring (2px, offset), matching the brand law that green is reserved for the
+   "runs on your device" claim and must not be spent on generic UI chrome. */
+:where(a, button, input, select, textarea, summary, [tabindex], .drop, .tool-card,
+  .featured-card, .related a, .chip, .act, .icbtn, .ed-tool, .ed-fit-btn):focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+/* inputs that already draw a soft glow keep a tighter inset ring instead of a doubled halo */
+.search-input:focus-visible, .txtin:focus-visible, select.txtin:focus-visible,
+textarea.txtin:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* ── Buttons ── ink is the primary fill; press gives a 1px physical shift. */
+.btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+.btn.ghost:active:not(:disabled), .btn.preview:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+
+/* Editor Save = THE green primary. Green here is consistent with the existing green
+   download button: the one action that produces the user's file, on their device. */
+.ed-save.btn { background: var(--local); box-shadow: 0 1px 2px rgba(14, 124, 87, 0.22); }
+.ed-save.btn:hover:not(:disabled) { background: #0C6B4B; box-shadow: 0 4px 14px rgba(14, 124, 87, 0.28); }
+.ed-save.btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+
+/* icon buttons and chips get a consistent press feel */
+.icbtn:active:not(:disabled), .ed-tool:active:not(:disabled),
+.related a:active, .chip:active, .act:active { transform: translateY(1px); }
+
+/* ── Progress ── slim bar with a travelling shimmer while work is in flight. */
+.bar { height: 6px; background: rgba(var(--accent-rgb), 0.08); }
+.bar i { position: relative; overflow: hidden; }
+
+/* ── Result panel ── a proper card: crisp elevation, tighter stat row. */
+.result-panel { box-shadow: var(--shadow-sm); }
+.result-stat {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  box-shadow: var(--shadow-xs);
+}
+.result-title { text-wrap: balance; }
+
+/* ── Cards & surfaces ── unify radius + elevation language. */
+.tool-card, .featured-card, .step, .sidebar-block, .privacy-block { border-radius: var(--radius); }
+.tool-card-panel, .ed-root { border-radius: var(--radius-lg); }
+.tool-card:hover { box-shadow: var(--shadow); }
+
+/* ══ Editor chrome (desktop) ══ */
+/* Toolbar reads as a single quiet strip; segments are separated by the existing .ed-sep. */
+.ed-toolbar { gap: 3px; padding: 7px 10px; }
+.ed-tool { border-radius: var(--radius-sm); padding: 8px 11px; min-height: 38px; }
+/* Active tool = inverted ink fill (unmistakable which instrument is armed). */
+.ed-tool.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.ed-tool.on svg { color: #fff; }
+.ed-tool.on:hover { background: #000; color: #fff; }
+.ed-sep { height: 22px; background: var(--line2); opacity: 0.7; margin: 0 5px; }
+
+/* Changes counter = a subtle pill, not loose text. */
+.ed-changes:not(:empty) {
+  display: inline-flex; align-items: center;
+  background: var(--warn-bg); color: var(--warn);
+  border: 1px solid #F0E0BE; border-radius: 100px;
+  padding: 4px 11px; font-size: 12px; font-weight: 700; opacity: 1;
+  letter-spacing: -0.01em;
+}
+
+/* Keep-original = a refined inline toggle, on the ink toolbar. */
+.ed-keep {
+  border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 100px;
+  padding: 5px 11px 5px 9px; background: rgba(255, 255, 255, 0.08);
+  transition: border-color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+}
+.ed-keep:hover { border-color: rgba(255, 255, 255, 0.38); background: rgba(255, 255, 255, 0.14); }
+.ed-keep input[type=checkbox] { accent-color: var(--local); width: 15px; height: 15px; }
+
+/* Restore chip — quiet, actionable. */
+.ed-restore-chip { animation: rise var(--dur-3) var(--ease-out) both; }
+
+/* Property bar — aligned, compact control groups. */
+.ed-propbar { padding: 9px 12px; gap: 12px; }
+.ed-propbar select:focus, .ed-propbar input[type=number]:focus { outline: 2px solid var(--ink); outline-offset: 1px; border-color: var(--ink); }
+
+/* Status row — a quiet toast-like strip. Hint reads as a soft inline notice. */
+.ed-statusbar { padding: 9px 14px; }
+.ed-hint-msg:not(:empty) {
+  display: inline-flex; align-items: center;
+  background: var(--ground-alt2, #F3F2EE); border: 1px solid var(--line);
+  border-radius: 8px; padding: 5px 12px; color: var(--ink2);
+  font-weight: 600; letter-spacing: -0.01em; font-size: 12.5px;
+}
+.ed-fit-btn { border-radius: 100px; padding: 5px 12px; transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease); }
+.ed-fit-btn:hover { border-color: var(--ink); color: var(--ink); }
+
+/* Page cards — a touch more lift so the document reads as a physical sheet. */
+.ed-page { box-shadow: 0 1px 3px rgba(17,24,39,0.10), 0 8px 24px rgba(17,24,39,0.10); border-radius: 2px; }
+
+/* Page-nav + zoom controls: consistent 30px targets, ink hover. */
+.ed-zoom button, .ed-pagenav button { border-radius: var(--radius-sm); transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease); }
+
+/* ══ Light motion system ══ transform/opacity only, reduced-motion opt-in.
+   Entrances are scoped to marketing surfaces — never the interactive tool/editor
+   surfaces the QA gate drives, so nothing animates under a synthetic event. */
+/* `rise` moves, it does not fade. It used to run opacity 0->1 alongside the slide, and for
+   those 280ms every --ink3 label inside a rising card composited down to ~4.25:1 against the
+   card it was sitting on — real, if brief, sub-AA text, and the reason an axe run sampled at
+   load+0ms reported 8 serious nodes where a settled run reported 4. Raising the floor is not
+   an option: --ink3 needs ~0.93 opacity to hold 4.5:1, so any fade you can actually see is
+   already failing. The 5px slide carries the entrance on its own. */
+@keyframes rise { from { transform: translateY(5px); } to { transform: none; } }
+@keyframes shimmer { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* progress shimmer */
+  .bar i::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+    animation: shimmer 1.15s var(--ease) infinite;
+  }
+  /* hero + section content settles in once */
+  .hero, .hero-compact, .tool-head, .section-head { animation: rise var(--dur-3) var(--ease-out) both; }
+  /* hub tool grid — gentle stagger (~30ms/card), capped at 10 so late cards don't lag */
+  .grid8 .t { animation: rise var(--dur-3) var(--ease-out) both; }
+  .grid8 .t:nth-child(1) { animation-delay: 0ms; }
+  .grid8 .t:nth-child(2) { animation-delay: 30ms; }
+  .grid8 .t:nth-child(3) { animation-delay: 60ms; }
+  .grid8 .t:nth-child(4) { animation-delay: 90ms; }
+  .grid8 .t:nth-child(5) { animation-delay: 120ms; }
+  .grid8 .t:nth-child(6) { animation-delay: 150ms; }
+  .grid8 .t:nth-child(7) { animation-delay: 180ms; }
+  .grid8 .t:nth-child(8) { animation-delay: 210ms; }
+  /* tool-page card grids (where .tool-card is used) */
+  .tools-grid .tool-card { animation: rise var(--dur-3) var(--ease-out) both; }
+  .tools-grid .tool-card:nth-child(1) { animation-delay: 0ms; }
+  .tools-grid .tool-card:nth-child(2) { animation-delay: 30ms; }
+  .tools-grid .tool-card:nth-child(3) { animation-delay: 60ms; }
+  .tools-grid .tool-card:nth-child(4) { animation-delay: 90ms; }
+  .tools-grid .tool-card:nth-child(5) { animation-delay: 120ms; }
+  .tools-grid .tool-card:nth-child(6) { animation-delay: 150ms; }
+  .tools-grid .tool-card:nth-child(7) { animation-delay: 180ms; }
+  .tools-grid .tool-card:nth-child(8) { animation-delay: 210ms; }
+  /* result panel slides up when work completes */
+  .result-panel { animation: rise var(--dur-3) var(--ease-out) both; }
+  /* editor hover-outline + hint fade */
+  .ed-hover { transition: opacity var(--dur-1) var(--ease); }
+  .ed-hint-msg { transition: background var(--dur-2) var(--ease); }
+  /* modal fade + scale-in */
+  .ed-modal { animation: modalIn var(--dur-2) var(--ease-out) both; }
+  .ed-modal-back, .pv-back { animation: pv-fade var(--dur-1) var(--ease) both; }
+}
+@keyframes modalIn { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+/* ══ Mobile (≤720px) — thumb ergonomics ══
+   P0 dock: the toolbar is VIEWPORT-FIXED at the bottom (not sticky inside .ed-root).
+   Sticky failed: .ed-root { overflow:hidden } is the sticky scrollport, so bottom:0 never
+   pinned to the phone screen and Save sat below the fold. Fixed chrome + --ed-dock-h pad
+   on the viewport keeps the document clear of the dock. While typing, the dock hides and
+   the Format/Done bar owns the thumb zone above the keyboard. */
+@media (max-width: 720px) {
+  .ed-root { display: flex; flex-direction: column; --ed-dock-h: 56px; }
+  .ed-propbar { order: 1; }
+  .ed-viewport { order: 2; padding-bottom: calc(24px + var(--ed-dock-h)); }
+  .ed-statusbar { order: 3; }
+  .ed-toolbar.ed-dock,
+  .ed-has-dock > .ed-toolbar {
+    order: 4;
+    position: fixed; left: 0; right: 0; bottom: 0;
+    z-index: 60;
+    display: flex; flex-wrap: nowrap; align-items: center;
+    gap: 2px; padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid rgba(255, 255, 255, 0.12); border-bottom: none;
+    border-radius: 0; box-shadow: 0 -10px 28px rgba(23, 23, 26, 0.28);
+    background: var(--ink); overflow: visible;
+  }
+  .ed-toolbar.ed-dock > * { flex: 0 0 auto; }
+  .ed-tool { min-height: var(--touch); min-width: var(--touch); justify-content: center; }
+  .ed-save.btn {
+    min-height: var(--touch); width: auto; padding: 10px 16px;
+    margin-left: 4px;
+    box-shadow: 0 1px 2px rgba(14, 124, 87, 0.22);
+  }
+  /* while typing: dock yields to Format / Done above the keyboard */
+  .ed-root.ed-editing > .ed-toolbar { visibility: hidden; pointer-events: none; }
+  .ed-keep { min-height: var(--touch); }
+  .ed-statusbar { flex-wrap: wrap; row-gap: 8px; }
+  .ed-hint-msg:not(:empty) { box-shadow: var(--shadow-sm); }
+  .ed-el .ed-handle::after {
+    content: ""; position: absolute; inset: -12px; border-radius: 50%;
+  }
+  .drop { padding: 44px 20px; min-height: 190px; }
+  .drop .dz-t { font-size: 17px; }
+}
+@media (hover: none) {
+  /* touch devices: always give handles the enlarged hit-area, hover or not */
+  .ed-el .ed-handle::after { content: ""; position: absolute; inset: -12px; border-radius: 50%; }
+}
+
+/* ═══ MOBILE TEXT EDITING ═══
+   FOUNDER LAW (2026-07-19): tapping text must NOT move the document.
+   v46 shipped a "focused-edit mode" that took the visual viewport (position:fixed; inset:0),
+   hid the page chrome and re-centred the paragraph. Nothing scaled — but the document jumped
+   ~300px to the top of the screen, and a user reads that as "it zoomed in". Rejected twice.
+   The editor now stays in PAGE FLOW while editing (.ed-editing): the tap places a caret and
+   nothing moves. Only the formatting strip and Done pin above the keyboard, as fixed chrome
+   that never repositions the document. The document is nudged solely when the caret would sit
+   behind the keyboard — the minimum, never a re-centre (see keepCaretClearOfKeyboard). */
+.ed-donebar { display: none; }
+@media (max-width: 720px) {
+  .ed-root { --ed-kb: 0px; }
+  /* formatting controls: a compact horizontal strip above the keyboard, not a permanent bar.
+     `fixed` (not absolute) so it rides the viewport WITHOUT the editor owning the screen.
+
+     CRITICAL: this is fixed WHENEVER IT IS VISIBLE, not only while editing. It used to be
+     `static` (in page flow) with a tool selected and `fixed` once an edit began — so the
+     moment you tapped text it left the flow and every pixel below it jumped up by its own
+     height (measured: 98px on Android, 82px on iOS). That was the last "it zoomed" report:
+     the document never scaled, the bar simply stopped taking up space.
+     A control that changes its own `position` mid-interaction moves the whole document. */
+  /* THE FORMATTING STRIP IS GONE ON PHONES. Measured on a live iPhone it packed 621px of
+     controls into 390px: Colour, Bold, Italic, pen and delete all sat off-screen behind a
+     sideways scroll. Formatting now lives in the Format bottom sheet, where it WRAPS and
+     nothing can hide. (This also removes the strip from the page flow entirely, so it can
+     never again shift the document by changing its own `position`.) */
+  .ed-root > .ed-propbar { display: none !important; }
+  .ed-fmt-head { display: flex; align-items: center; justify-content: space-between; }
+  .ed-fmt-done { padding: 5px 14px; font-size: 12.5px; }
+  .ed-fmt-sheet .ed-propbar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    position: static; margin: 0; padding: 2px 0; border: 0; background: none;
+    overflow: visible; max-height: none;
+  }
+  .ed-fmt-sheet .ed-propbar > * { flex: 0 0 auto; }
+  .ed-fmt-sheet .ed-propbar select { max-width: 60vw; }
+  .ed-root.ed-editing .ed-donebar {
+    display: flex; align-items: center;
+    position: fixed; left: 0; right: 0;
+    bottom: var(--ed-kb); min-height: 54px;
+    padding: 8px 14px; gap: 8px;
+    background: var(--card); border-top: 1px solid var(--line); z-index: 61;
+    box-shadow: 0 -6px 20px rgba(17, 24, 39, 0.08);
+  }
+  .ed-donebar .spacer { flex: 1; }
+  /* one shared secondary-button style so Format and Resize read as a set, not two odd pills */
+  .ed-bar-btn {
+    border: 1px solid var(--line2); background: #fff; color: var(--ink2);
+    border-radius: 9px; padding: 8px 14px; font-size: 13px; font-weight: 700;
+    min-height: 38px; cursor: pointer; transition: border-color var(--dur-1) var(--ease), color var(--dur-1) var(--ease), background var(--dur-1) var(--ease);
+  }
+  .ed-bar-btn:active { background: var(--ground-alt); }
+  .ed-done.btn {
+    background: var(--local); color: #fff; border: 0;
+    padding: 8px 20px; min-height: 38px; border-radius: 9px; font-weight: 800; font-size: 13.5px;
+  }
+  .ed-resize-tgl.on, .ed-fmt-btn.on { border-color: var(--ink); color: var(--ink); background: var(--ground-alt); }
+
+  /* ── THE 5-SLOT LAW: Select · Text · More · Undo · Save — nothing else on the dock.
+     Fixed to the viewport (see .ed-dock above). Redo + annotate tools live in More.
+     Fixed 44px slots: 4×44 + Save (~86) ≈ 270px — fits a 320px phone with room. */
+  .ed-toolbar.ed-dock,
+  .ed-has-dock > .ed-toolbar {
+    overflow-x: visible; flex-wrap: nowrap; gap: 1px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+  }
+  .ed-toolbar .ed-tool {
+    flex: 0 0 auto; min-width: 44px; justify-content: center;
+    flex-direction: column; gap: 2px; padding: 6px 3px;
+    font-size: 10.5px; line-height: 1.1; min-height: 46px;
+  }
+  .ed-toolbar .ed-tool svg { width: 18px; height: 18px; }
+  .ed-toolbar .ed-sep { display: none; }
+  .ed-toolbar .ed-save { flex: 0 0 auto; margin-left: auto; padding: 8px 14px; font-size: 13px; white-space: nowrap; }
+  .ed-toolbar .ed-changes:not(:empty) { display: none; } /* count lives in More on phones */
+  /* while TYPING the handles hide — resize is an explicit mode (big invisible hit areas stay) */
+  /* !important matches the desktop side-handles-live-while-editing rule it must beat */
+  .ed-root.ed-editing:not(.ed-resize-on) .ed-el.editing .ed-handle,
+  .ed-root.ed-editing:not(.ed-resize-on) .ed-el.editing .ed-del { display: none !important; }
+
+  /* ── "More" bottom sheet: secondary tools + Redo + Keep + edit count ── */
+  .ed-sheet-bg { position: fixed; inset: 0; background: rgba(23, 23, 26, 0.35); z-index: 70; }
+  .ed-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 71;
+    background: var(--card); border-radius: 14px 14px 0 0;
+    box-shadow: 0 -12px 40px rgba(23, 23, 26, 0.18);
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+    animation: sheet-up var(--dur-3) var(--ease-out) both;
+  }
+  @keyframes sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .ed-sheet-h { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink3); margin-bottom: 10px; }
+  .ed-sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .ed-sheet-grid .ed-tool {
+    flex-direction: column; gap: 6px; justify-content: center; color: var(--ink2);
+    border: 1px solid var(--line); border-radius: 10px; min-height: 64px; font-size: 12px;
+  }
+  .ed-sheet-grid .ed-tool svg { width: 20px; height: 20px; }
+  .ed-sheet-grid .ed-tool.on { border-color: var(--ink); color: var(--ink); background: var(--ground-alt); }
+  .ed-sheet-opts { display: flex; align-items: center; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .ed-sheet-opts .ed-keep { border-color: var(--line); background: var(--ground-alt2); color: var(--ink2); }
+  .ed-sheet-opts .ed-changes:not(:empty) {
+    display: inline-flex; font-size: 12px; padding: 4px 10px; border-radius: 999px;
+    background: var(--ground-alt); color: var(--ink2); white-space: nowrap;
+  }
+  .ed-sheet-opts select { border: 1px solid var(--line2); border-radius: 7px; padding: 6px 8px; font-size: 13px; }
+}
+
+/* editor page: the story lives BELOW the tool — three short editorial columns */
+/* .ed-about layout removed 2026-08-04 with the pdf-editor-only section it styled — the
+   capability claims it carried now live in .uc-caps, rendered from data for any tool. */
+
+/* ── THE FOCUS-ZOOM LAW (mobile) ───────────────────────────────────────────
+   iOS Safari zooms the OS viewport whenever a focused TEXT-ENTRY control
+   computes under 16px. Competitors kill this with `user-scalable=no,
+   maximum-scale=1` — one line, and it costs the user the ability to magnify
+   (WCAG 1.4.4). We serve arbitrary documents and scans where pinch is a real
+   need, so we keep zoom available and pay the cost properly instead:
+
+   LAW: at a coarse pointer, every focusable text-entry control computes >= 16px.
+
+   Where a control must LOOK smaller than 16px, inflate the computed size and
+   divide it back out with an inverse scale transform (the v46 editor
+   technique in editor.js `ensureEditableZoom` / `layoutEl`) — never lower the
+   computed size to get the look.
+
+   The v46 mobile rebuild fixed this for exactly one element (the paragraph
+   contenteditable) and left every other control below the threshold, which is
+   why tapping any field still zoomed. Enforced now by the FOCUS-ZOOM section
+   of _qa/mobile-editor.mjs, which walks controls by ELEMENT TYPE at runtime —
+   a name-based CSS audit missed `.ed-pagein` (12.5px) entirely. */
+@media (pointer: coarse) {
+  /* Precise canvas gestures keep a compact visual mark while exposing a phone-sized hit area. */
+  .cropbox .cbh { width: 24px; height: 24px; }
+  .cropbox .cbh.nw { top: -13px; left: -13px; }
+  .cropbox .cbh.ne { top: -13px; right: -13px; }
+  .cropbox .cbh.sw { bottom: -13px; left: -13px; }
+  .cropbox .cbh.se { bottom: -13px; right: -13px; }
+  .cropbox .cbh::after { content: ""; position: absolute; inset: -10px; border-radius: 50%; }
+
+  /* The fillable-field grip used to be a literal 12px target. Keep its 12px blue cue aligned
+     to the corner, but let the transparent originating element receive a full 44px touch. */
+  .mf-field { overflow: visible !important; }
+  .mf-field .mf-grip {
+    width: 44px !important; height: 44px !important;
+    max-width: none !important; max-height: none !important;
+    right: -16px !important; bottom: -16px !important;
+    background: transparent !important;
+  }
+  .mf-field .mf-grip::after {
+    content: ""; position: absolute; right: 16px; bottom: 16px;
+    width: 12px; height: 12px; background: #1D4ED8; border-radius: 2px;
+  }
+
+  /* Thumbnail and file-row icon controls are primary touch actions on their tool screens. */
+  .icbtn { width: 44px; height: 44px; }
+  .pthumb .pdel, .pthumb .prot, .pmove { width: 44px; height: 44px; }
+  .pmove-up { left: 4px; bottom: 4px; }
+  .pmove-dn { left: 52px; bottom: 4px; }
+  .pthumb .pdel { top: 4px; right: 4px; }
+  .pthumb .prot { right: 4px; bottom: 52px; }
+  .pospick button { height: 44px; }
+
+  /* the floor for anything not explicitly sized (UA default is ~13.3px) */
+  input, select, textarea, [contenteditable] { font-size: 16px; }
+
+  /* explicitly-sized controls, raised to meet the floor at their own specificity */
+  .search-input { font-size: 16px; }
+  .txtin, select.txtin, textarea.txtin { font-size: 16px; }
+  .txtin.mono { font-size: 16px; }  /* specificity ties the base .txtin.mono rule */
+  .ed-propbar select, .ed-propbar input[type=number] { font-size: 16px; }
+  .ed-sheet-opts select { font-size: 16px; }
+  .ed-pagein { font-size: 16px; width: 54px; height: 30px; }
+}
+
+/* ═══ SHARED SCROLL MOTION (2026-08-04) ═══════════════════════════════════════════════
+   Armed by site.js, which EVERY page loads — this used to live in hub.css/hub.js, so all
+   33 tool pages had no motion whatsoever: sections, fold rows and question rows all sat
+   still. Class-driven (.pre/.in), so it works on the hub's `.sec` and the tool pages'
+   `.section` without either needing to know about the other.
+   Never armed under prefers-reduced-motion; with JS off no class is ever added and every
+   element is simply visible. Transform + opacity only — nothing here can shift layout. */
+/* NOTHING IS EVER HIDDEN (2026-08-04, after the founder watched Popular Tools arrive buried
+   on his phone). The old model set below-fold sections to opacity:0 and waited for an
+   IntersectionObserver to reveal them — and real iOS THROTTLES IO callbacks during momentum
+   scroll, so on a phone the page showed holes where content should be. Emulation fires IO
+   instantly, which is why every emulated check passed while the real device buried sections.
+   New contract: base state = fully visible, always, everywhere. `.in` is an ACCENT — a short
+   settle from 55% opacity and 14px — so if IO fires late the worst case is content that is
+   simply already there. `.pre` exists only as the re-arm marker; it hides nothing. */
+.pre { }
+.in { animation: secrise 520ms cubic-bezier(.18,.85,.25,1.14) both; }
+/* No scale in this keyframe: the overshoot ease runs every animated value PAST its target,
+   and scale .965→1 overshooting to ~1.005 made every full-width section momentarily wider
+   than the viewport — 1px horizontal overflow on 37/40 pages, caught by the gate. The
+   vertical overshoot is free; the horizontal one costs the layout. */
+/* No scale in this keyframe: the overshoot ease runs every animated value PAST its target —
+   scale .965→1 overshooting to ~1.005 made every full-width section momentarily wider than
+   the viewport (1px horizontal overflow on 37/40 pages, caught at the gate). This is the ONLY
+   definition of secrise sitewide — keep it that way (last keyframe name wins, silently). */
+@keyframes secrise { from { opacity: .25; transform: translateY(46px); } to { opacity: 1; transform: none; } }
+@keyframes inkdraw { to { stroke-dashoffset: 0; } }
+.prog {
+  position: fixed; top: 0; left: 0; width: 100%; height: 2px; z-index: 80;
+  background: var(--ink); transform: scaleX(var(--p, 0)); transform-origin: 0 50%;
+  pointer-events: none;
+}
+
+/* TOOL PAGES — the answer, then each fold, then the questions inside them, in reading order.
+   The question rows are the part the founder asked for by name: they are <details> inside a
+   <details>, so they matched nothing the hub's card selectors covered. */
+.section.in .uc-answer { animation: secrise 520ms cubic-bezier(.22,.68,.3,1) both; animation-delay: 40ms; }
+.section.in .uc-fold   { animation: secrise 520ms cubic-bezier(.22,.68,.3,1) both; }
+.section.in .uc-fold:nth-of-type(1) { animation-delay: 120ms; }
+.section.in .uc-fold:nth-of-type(2) { animation-delay: 190ms; }
+.section.in .uc-q { animation: secrise 440ms cubic-bezier(.22,.68,.3,1) both; }
+.section.in .uc-q:nth-of-type(1) { animation-delay: 60ms; }
+.section.in .uc-q:nth-of-type(2) { animation-delay: 105ms; }
+.section.in .uc-q:nth-of-type(3) { animation-delay: 150ms; }
+.section.in .uc-q:nth-of-type(4) { animation-delay: 195ms; }
+.section.in .uc-q:nth-of-type(5) { animation-delay: 240ms; }
+.section.in .uc-q:nth-of-type(6) { animation-delay: 285ms; }
+.section.in .uc-q:nth-of-type(7) { animation-delay: 330ms; }
+.section.in .uc-q:nth-of-type(8) { animation-delay: 375ms; }
+.section.in .uc-q:nth-of-type(9) { animation-delay: 420ms; }
+.section.in .uc-caps-list li { animation: secrise 420ms cubic-bezier(.22,.68,.3,1) both; }
+.section.in .uc-caps-list li:nth-child(2) { animation-delay: 50ms; }
+.section.in .uc-caps-list li:nth-child(3) { animation-delay: 100ms; }
+.section.in .uc-caps-list li:nth-child(4) { animation-delay: 150ms; }
+.section.in .uc-caps-list li:nth-child(5) { animation-delay: 200ms; }
+.section.in .uc-caps-list li:nth-child(6) { animation-delay: 250ms; }
+/* the tool's own mark draws itself in, like the hub's icons */
+/* dasharray only ever applied WITH the animation ('both' holds the from-state during the
+   delay) — an icon whose draw never fires is simply drawn, never missing. */
+.ink-armed .hero-ic svg > * {
+  animation: inkdraw2 760ms cubic-bezier(.22,.68,.3,1) both .18s;
+}
+@keyframes inkdraw2 { from { stroke-dasharray: var(--len); stroke-dashoffset: var(--len); } to { stroke-dasharray: var(--len); stroke-dashoffset: 0; } }
+
+/* ── REDUCED MOTION: cross-fade, not nothing (2026-08-04) ──
+   The founder saw a completely static page on his iPhone. The old gate returned early and
+   removed every effect for anyone with Reduce Motion enabled. The preference targets
+   VESTIBULAR motion — things that slide, drift or scale under you — and the documented
+   substitute is a cross-fade, so arrivals stay, they simply stop travelling. */
+.motion-reduced .in { animation: secfade 420ms ease both; }
+.motion-reduced .section.in .uc-answer,
+.motion-reduced .section.in .uc-fold,
+.motion-reduced .section.in .uc-q,
+.motion-reduced .section.in .uc-caps-list li,
+.motion-reduced .sec.in .wrap > details,
+.motion-reduced .sec.in :is(.t,.cat) { animation-name: secfade; }
+@keyframes secfade { from { opacity: .55; } to { opacity: 1; } }
+/* nothing may travel: drift, sweep and the hero deal-out are off */
+.motion-reduced .sec .wrap[data-mark]::before,
+.motion-reduced .ed-shot { translate: none !important; }
+.motion-reduced .t::after { display: none; }
+.motion-reduced .drop::before,
+.motion-reduced .drop::after { animation: none; }
+.motion-reduced .sec.in::after { animation: none; transform: scaleX(1); }
+
+/* Touch screens settle faster: a flick crosses the pre-trigger zone in tens of ms, so the
+   reveal gets less head start than a wheel scroll — a shorter run closes the gap and the
+   section is whole by the time the eye lands on it. */
+@media (pointer: coarse) { .in { animation-duration: 460ms; } }
