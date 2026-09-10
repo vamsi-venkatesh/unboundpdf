@@ -6,7 +6,9 @@
 
 UnboundPDF is a free browser-based document suite. The production product currently offers 53 PDF and image tools. Files are processed locally in the browser; the tool runtime has no document-upload API.
 
-![Selected UnboundPDF public edition](docs/images/overview.png)
+The image below is the live UnboundPDF product at [unboundpdf.com](https://unboundpdf.com/), captured on 10 September 2026.
+
+![Live UnboundPDF product homepage](docs/images/overview.png)
 
 This repository publishes three representative, runnable tools and a deliberately smaller Workspace demonstration:
 

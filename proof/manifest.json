@@ -24,7 +24,7 @@
       "npm test",
       "npm run audit:public"
     ],
-    "filesBeforeManifest": 91
+    "filesBeforeManifest": 90
   },
   "artifacts": {
     "tools/merge-pdf/index.html": {
