@@ -1,5 +1,6 @@
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative } from "node:path";
+import { createHash } from "node:crypto";
 
 const root = new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const forbiddenTop = new Set(["engine","research","_qa","data","analytics","blueprints","prompts","services",".claude","node_modules","shots","deploy"]);
@@ -32,4 +33,22 @@ for (const file of files) {
 }
 const selected = ["tools/merge-pdf/index.html","tools/ocr-pdf/index.html","tools/redaction-verifier/index.html","workspace/index.html"];
 for (const rel of selected) if (!files.some(f => f.rel === rel)) throw new Error(`missing selected surface: ${rel}`);
+
+const thirdParty = JSON.parse(await readFile(join(root, "docs/third-party-manifest.json"), "utf8"));
+const pdfLib = thirdParty.entries.find(entry => entry.id === "pdf-lib");
+if (!pdfLib || pdfLib.name !== "@cantoo/pdf-lib" || pdfLib.version !== "2.5.3") {
+  throw new Error("@cantoo/pdf-lib 2.5.3 provenance is missing from the third-party manifest");
+}
+const pdfLibBytes = await readFile(join(root, "tools/assets/pdf-lib.min.js"));
+const commentEnd = pdfLibBytes.indexOf(Buffer.from("*/\n"));
+if (commentEnd < 0) throw new Error("pdf-lib attribution header is missing");
+const payloadHash = createHash("sha256").update(pdfLibBytes.subarray(commentEnd + 3)).digest("hex");
+if (payloadHash !== pdfLib.upstreamDistSha256) throw new Error(`pdf-lib payload hash drift: ${payloadHash}`);
+const bundledNames = new Set((pdfLib.bundledDependencies || []).map(dep => dep.name));
+for (const required of ["@pdf-lib/standard-fonts", "@pdf-lib/upng", "crypto-js", "pako", "tslib"]) {
+  if (!bundledNames.has(required)) throw new Error(`missing bundled pdf-lib dependency: ${required}`);
+}
+for (const absent of ["@pdf-lib/fontkit", "fontkit", "fflate"]) {
+  if (bundledNames.has(absent)) throw new Error(`incorrect embedded pdf-lib dependency: ${absent}`);
+}
 console.log(`PUBLIC AUDIT PASS — ${files.length} files, declared boundary present, no forbidden path or text pattern`);

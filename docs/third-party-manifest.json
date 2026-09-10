@@ -16,14 +16,97 @@
     },
     {
       "id": "pdf-lib",
-      "name": "pdf-lib",
-      "version": "unspecified in bundle (no semver string embedded; vendored per pdf-textedit.js/pdf-textops.js dependency comment)",
+      "name": "@cantoo/pdf-lib",
+      "version": "2.5.3",
       "license": "MIT",
-      "copyright": "Copyright (c) Andrew Dillon and pdf-lib contributors",
-      "homepage": "https://pdf-lib.js.org/",
+      "copyright": "Copyright (c) 2019 Andrew Dillon",
+      "homepage": "https://github.com/cantoo-scribe/pdf-lib",
       "files": [
         "tools/assets/pdf-lib.min.js"
-      ]
+      ],
+      "upstreamDistSha256": "9a682e892f837627ac71a1b7e604c2f9654f343648eadee221d7e115c89bb0ee",
+      "vendoredFileSha256": "92cf2932ffaa2fb204098f7de47d997f72a5eb0356873bf349eff9d51c5de5c6",
+      "bundledDependencies": [
+        {
+          "name": "@pdf-lib/standard-fonts",
+          "version": "1.0.0",
+          "license": "MIT",
+          "upstream": "https://github.com/Hopding/standard-fonts"
+        },
+        {
+          "name": "@pdf-lib/upng",
+          "version": "1.0.1",
+          "license": "MIT",
+          "upstream": "https://github.com/Hopding/upng"
+        },
+        {
+          "name": "color",
+          "version": "4.2.3",
+          "license": "MIT",
+          "upstream": "https://github.com/Qix-/color"
+        },
+        {
+          "name": "color-convert",
+          "version": "2.0.1",
+          "license": "MIT",
+          "upstream": "https://github.com/Qix-/color-convert"
+        },
+        {
+          "name": "color-name",
+          "version": "1.1.4",
+          "license": "MIT",
+          "upstream": "https://github.com/colorjs/color-name"
+        },
+        {
+          "name": "color-string",
+          "version": "1.9.1",
+          "license": "MIT",
+          "upstream": "https://github.com/Qix-/color-string"
+        },
+        {
+          "name": "simple-swizzle",
+          "version": "0.2.2",
+          "license": "MIT",
+          "upstream": "https://github.com/Qix-/node-simple-swizzle"
+        },
+        {
+          "name": "is-arrayish",
+          "version": "0.3.2",
+          "license": "MIT",
+          "upstream": "https://github.com/qix-/node-is-arrayish"
+        },
+        {
+          "name": "crypto-js",
+          "version": "4.2.0",
+          "license": "MIT",
+          "upstream": "https://github.com/brix/crypto-js"
+        },
+        {
+          "name": "node-html-better-parser",
+          "version": "1.5.6",
+          "license": "MIT",
+          "upstream": "https://github.com/Sharcoux/node-html-parser"
+        },
+        {
+          "name": "html-entities",
+          "version": "2.4.0",
+          "license": "MIT",
+          "upstream": "https://github.com/mdevils/html-entities"
+        },
+        {
+          "name": "pako",
+          "version": "1.0.11",
+          "license": "MIT AND Zlib",
+          "upstream": "https://github.com/nodeca/pako"
+        },
+        {
+          "name": "tslib",
+          "version": "2.8.1",
+          "license": "0BSD",
+          "upstream": "https://github.com/microsoft/tslib"
+        }
+      ],
+      "provenanceNote": "The code payload after the leading licence comment is byte-for-byte identical to the published @cantoo/pdf-lib 2.5.3 UMD distribution. The versions below come from that release tag's yarn.lock. fontkit and fflate are not embedded in this bundle."
     },
     {
       "id": "tesseractjs",
@@ -93,8 +176,8 @@
     },
     {
       "id": "tesseract-langdata-legacy",
-      "name": "Tesseract OCR trained language data \u2014 legacy set (7 files: eng/deu/fra/spa/ita/por/nld)",
-      "version": "tessdata (the MAIN tesseract-ocr/tessdata repo, combined legacy+LSTM family \u2014 NOT tessdata_best), mirrored via tessdata.projectnaptha.com/4.0.0 per fetch-tesseract.sh",
+      "name": "Tesseract OCR trained language data — legacy set (7 files: eng/deu/fra/spa/ita/por/nld)",
+      "version": "tessdata (the MAIN tesseract-ocr/tessdata repo, combined legacy+LSTM family — NOT tessdata_best), mirrored via tessdata.projectnaptha.com/4.0.0 per fetch-tesseract.sh",
       "license": "Apache-2.0",
       "copyright": "Copyright (c) Google Inc. and Tesseract OCR contributors",
       "homepage": "https://github.com/tesseract-ocr/tessdata",
