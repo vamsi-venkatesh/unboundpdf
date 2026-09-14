@@ -24,6 +24,8 @@ The complete production implementation, full tool catalogue, PDF editor, growth 
 ## Run locally
 
 ```bash
+git clone https://github.com/vamsi-venkatesh/unboundpdf.git
+cd unboundpdf
 python3 -m http.server 4173
 ```
 
@@ -31,10 +33,16 @@ Then open <http://127.0.0.1:4173/>. The repository contains no server-side docum
 
 ## Verify
 
+Use Node.js 22 and npm, matching the CI environment. Install the development dependencies and Chromium before running the checks:
+
 ```bash
+npm ci
+npx playwright install --with-deps chromium
 npm test
 npm run audit:public
 ```
+
+The install commands fetch test dependencies and the browser binary; document processing itself remains browser-local.
 
 The tests inspect the selected product surface, exercise the Workspace merge path, verify a redaction-detection corpus, confirm same-origin OCR assets, scan the public tree for forbidden private material, and reject files outside the declared boundary.
 
